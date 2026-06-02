@@ -1,62 +1,31 @@
-// ── MOCK DATA (replace with API call later) ──
-const mockHostels = [
-  {
-    id: 1,
-    title: "Boys Hostel Near MIT College",
-    address: "Aurangabad, MH",
-    rent_amount: 4500,
-    type: "Student",
-    tags: ["WiFi", "Mess"],
-    emoji: "🏢"
-  },
-  {
-    id: 2,
-    title: "Girls PG Near MGM College",
-    address: "Cidco, Aurangabad",
-    rent_amount: 5000,
-    type: "Girl",
-    tags: ["WiFi", "AC"],
-    emoji: "🏠"
-  },
-  {
-    id: 3,
-    title: "Sunrise Boys Hostel",
-    address: "Garkheda, Aurangabad",
-    rent_amount: 3800,
-    type: "Student",
-    tags: ["Mess", "CCTV"],
-    emoji: "🏨"
-  },
-  {
-    id: 4,
-    title: "Green Valley Girls PG",
-    address: "Osmanpura, Aurangabad",
-    rent_amount: 6000,
-    type: "Girl",
-    tags: ["WiFi", "Mess", "AC"],
-    emoji: "🏡"
-  },
-  {
-    id: 5,
-    title: "Budget Stay Near BAMU",
-    address: "University Road, Aurangabad",
-    rent_amount: 3000,
-    type: "Student",
-    tags: ["WiFi"],
-    emoji: "🏘"
-  },
-  {
-    id: 6,
-    title: "Royal PG for Girls",
-    address: "Cantonment, Aurangabad",
-    rent_amount: 7000,
-    type: "Girl",
-    tags: ["WiFi", "Mess", "Gym"],
-    emoji: "🏰"
-  }
-];
+// ── API CONFIG ──
+const API_BASE = 'http://127.0.0.1:8000/api';
 
+let allHostels = [];
 let currentFilter = 'all';
+
+// ── FETCH FROM REAL BACKEND ──
+async function fetchHostels() {
+  const grid = document.getElementById('hostelGrid');
+  grid.innerHTML = '<p style="text-align:center;padding:40px;color:#888;">Loading hostels...</p>';
+
+  try {
+    const response = await fetch(`${API_BASE}/hostels/`);
+    const data = await response.json();
+
+    // Enrich data with emoji (until images are added)
+    const emojis = ['🏢', '🏠', '🏨', '🏡', '🏘', '🏰'];
+    allHostels = data.map((h, i) => ({
+      ...h,
+      emoji: emojis[i % emojis.length]
+    }));
+
+    renderHostels(allHostels);
+
+  } catch (error) {
+    grid.innerHTML = '<p style="text-align:center;padding:40px;color:#e94560;">Failed to load hostels. Make sure the backend server is running.</p>';
+  }
+}
 
 // ── RENDER CARDS ──
 function renderHostels(data) {
@@ -76,16 +45,6 @@ function renderHostels(data) {
   count.textContent = `(${data.length} found)`;
 
   data.forEach(hostel => {
-    const tagsHTML = hostel.tags.map(tag => {
-      let cls = 'tag-wifi';
-      if (tag === 'Mess') cls = 'tag-mess';
-      return `<span class="tag ${cls}">${tag}</span>`;
-    }).join('');
-
-    const typeTag = hostel.type === 'Girl'
-      ? `<span class="tag tag-girls">Girls</span>`
-      : `<span class="tag tag-boys">Boys</span>`;
-
     grid.innerHTML += `
       <div class="hostel-card">
         <div class="card-image">${hostel.emoji}</div>
@@ -93,12 +52,12 @@ function renderHostels(data) {
           <div class="card-title">${hostel.title}</div>
           <div class="card-location">${hostel.address}</div>
           <div class="card-tags">
-            ${typeTag}
-            ${tagsHTML}
+            <span class="tag tag-boys">Hostel</span>
+            <span class="tag tag-wifi">WiFi</span>
           </div>
           <div class="card-footer">
             <div class="card-price">
-              ₹${hostel.rent_amount.toLocaleString()}
+              ₹${Number(hostel.rent_amount).toLocaleString()}
               <span>/month</span>
             </div>
             <button class="btn-view" onclick="viewHostel(${hostel.id})">
@@ -114,12 +73,10 @@ function renderHostels(data) {
 // ── SEARCH ──
 function filterHostels() {
   const query = document.getElementById('searchInput').value.toLowerCase();
-  let filtered = mockHostels;
+  let filtered = allHostels;
 
   if (currentFilter === 'budget') {
-    filtered = filtered.filter(h => h.rent_amount < 5000);
-  } else if (currentFilter !== 'all') {
-    filtered = filtered.filter(h => h.type === currentFilter);
+    filtered = filtered.filter(h => Number(h.rent_amount) < 5000);
   }
 
   if (query) {
@@ -141,10 +98,10 @@ function setFilter(filter, btn) {
   filterHostels();
 }
 
-// ── VIEW DETAILS (placeholder) ──
+// ── GO TO DETAIL PAGE ──
 function viewHostel(id) {
-  alert(`Hostel detail page for ID ${id} — coming soon!`);
+  window.location.href = `detail.html?id=${id}`;
 }
 
 // ── INIT ──
-renderHostels(mockHostels);
+fetchHostels();
