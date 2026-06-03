@@ -1,8 +1,8 @@
+# hostels/urls.py
+
 from django.urls import path
-from .views import GetHostelsView, CreateHostelView, UploadHostelImageView
+from .views import HostelListView
 
 urlpatterns = [
-    path('', GetHostelsView.as_view(), name='get-hostels'),
-    path('create/', CreateHostelView.as_view(), name='create-hostel'),
-    path('<int:hostel_id>/upload-image/', UploadHostelImageView.as_view(), name='upload-image'),
+    path('', HostelListView.as_view(), name='hostel-list'),
 ]
