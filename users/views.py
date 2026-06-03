@@ -1,9 +1,9 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import RegisterSerializer, LoginSerializer
 from .models import User
+from .authentication import get_tokens_for_user
 import bcrypt
 
 class RegisterView(APIView):
@@ -34,12 +34,9 @@ class LoginView(APIView):
                 )
 
             if bcrypt.checkpw(password.encode('utf-8'), user.password_hash.encode('utf-8')):
-                refresh = RefreshToken.for_user(user)
-                return Response({
-                    "refresh": str(refresh),
-                    "access":  str(refresh.access_token),
-                    "role":    user.role
-                })
+                tokens = get_tokens_for_user(user)
+                return Response(tokens)
+
             return Response(
                 {"error": "Invalid credentials"},
                 status=status.HTTP_401_UNAUTHORIZED

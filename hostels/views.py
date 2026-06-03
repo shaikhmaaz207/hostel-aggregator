@@ -1,27 +1,29 @@
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from users.permissions import IsOwner
 from .models import Hostel
-from .serializers import HostelSerializer, HostelCreateSerializer
+from .serializers import HostelSerializer
 
-@api_view(['GET'])
-@permission_classes([AllowAny])
-def get_hostels(request):
-    hostels = Hostel.objects.all()
-    serializer = HostelSerializer(hostels, many=True)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+class GetHostelsView(APIView):
+    permission_classes = [AllowAny]  # Anyone can view hostels
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def create_hostel(request):
-    if request.user.role != 'Owner':
+    def get(self, request):
+        hostels = Hostel.objects.all()
+        serializer = HostelSerializer(hostels, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class CreateHostelView(APIView):
+    permission_classes = [IsAuthenticated, IsOwner]  # Only Owners can create
+
+    def post(self, request):
+        serializer = HostelSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(owner=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(
-            {"error": "Only hostel owners can create listings"},
-            status=status.HTTP_403_FORBIDDEN
+            {"errors": serializer.errors},
+            status=status.HTTP_400_BAD_REQUEST
         )
-    serializer = HostelCreateSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save(owner=request.user)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
