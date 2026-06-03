@@ -3,11 +3,16 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from users.permissions import IsOwner
+from users.authentication import CustomJWTAuthentication
 from .models import Hostel
 from .serializers import HostelSerializer
+from PIL import Image
+from django.core.files.base import ContentFile
+import io
+import os
 
 class GetHostelsView(APIView):
-    permission_classes = [AllowAny]  # Anyone can view hostels
+    permission_classes = [AllowAny]
 
     def get(self, request):
         hostels = Hostel.objects.all()
@@ -16,7 +21,8 @@ class GetHostelsView(APIView):
 
 
 class CreateHostelView(APIView):
-    permission_classes = [IsAuthenticated, IsOwner]  # Only Owners can create
+    authentication_classes = [CustomJWTAuthentication]
+    permission_classes = [IsAuthenticated, IsOwner]
 
     def post(self, request):
         serializer = HostelSerializer(data=request.data)
@@ -27,3 +33,44 @@ class CreateHostelView(APIView):
             {"errors": serializer.errors},
             status=status.HTTP_400_BAD_REQUEST
         )
+
+
+class UploadHostelImageView(APIView):
+    authentication_classes = [CustomJWTAuthentication]
+    permission_classes = [IsAuthenticated, IsOwner]
+
+    def post(self, request, hostel_id):
+        try:
+            hostel = Hostel.objects.get(id=hostel_id, owner=request.user)
+        except Hostel.DoesNotExist:
+            return Response(
+                {"error": "Hostel not found or you don't own it"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if 'image' not in request.FILES:
+            return Response(
+                {"error": "No image file provided"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        image_file = request.FILES['image']
+        img = Image.open(image_file)
+
+        if img.mode in ('RGBA', 'P'):
+            img = img.convert('RGB')
+
+        max_size = (800, 600)
+        img.thumbnail(max_size, Image.LANCZOS)
+
+        output = io.BytesIO()
+        img.save(output, format='JPEG', quality=85, optimize=True)
+        output.seek(0)
+
+        filename = f"hostel_{hostel_id}_{image_file.name}"
+        hostel.image.save(filename, ContentFile(output.read()), save=True)
+
+        return Response({
+            "message": "Image uploaded successfully",
+            "image_url": request.build_absolute_uri(hostel.image.url)
+        }, status=status.HTTP_200_OK)
