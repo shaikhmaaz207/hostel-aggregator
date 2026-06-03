@@ -6,15 +6,19 @@ class UserRole(models.TextChoices):
     ADMIN   = 'Admin',   'Admin'
 
 class User(models.Model):
-    name          = models.CharField(max_length=150)
-    email         = models.EmailField(unique=True)
-    password_hash = models.CharField(max_length=255)
-    role          = models.CharField(
-                        max_length=10,
-                        choices=UserRole.choices,
-                        default=UserRole.STUDENT
-                    )
-    created_at    = models.DateTimeField(auto_now_add=True)
+    name            = models.CharField(max_length=150)
+    email           = models.EmailField(unique=True)
+    password_hash   = models.CharField(max_length=255)
+    role            = models.CharField(
+                          max_length=10,
+                          choices=UserRole.choices,
+                          default=UserRole.STUDENT
+                      )
+    # New fields for HA-8
+    phone_number    = models.CharField(max_length=15, blank=True, null=True)
+    profile_picture = models.ImageField(upload_to='profiles/', blank=True, null=True)
+    college_name    = models.CharField(max_length=200, blank=True, null=True)
+    created_at      = models.DateTimeField(auto_now_add=True)
 
     @property
     def is_authenticated(self):

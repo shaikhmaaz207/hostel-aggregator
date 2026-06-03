@@ -19,3 +19,15 @@ class RegisterSerializer(serializers.ModelSerializer):
 class LoginSerializer(serializers.Serializer):
     email    = serializers.EmailField()
     password = serializers.CharField(write_only=True)
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = User
+        fields = [
+            'id', 'name', 'email', 'role',
+            'phone_number', 'profile_picture', 'college_name',
+            'created_at'
+        ]
+        # Block modifications to these fields
+        read_only_fields = ['id', 'email', 'role', 'created_at']
