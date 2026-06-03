@@ -1,7 +1,7 @@
 from django.urls import path
-from . import views
+from .views import GetHostelsView, CreateHostelView
 
 urlpatterns = [
-    path('', views.get_hostels, name='get_hostels'),
-    path('create/', views.create_hostel, name='create_hostel'),
+    path('', GetHostelsView.as_view(), name='get-hostels'),
+    path('create/', CreateHostelView.as_view(), name='create-hostel'),
 ]
