@@ -3,8 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>HostelFinder — Find Your Perfect PG</title>
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/browse.css" />
 </head>
 <body>
 
@@ -24,33 +30,134 @@
       <h1>Find Your Home Away From Home</h1>
       <p>Browse verified hostels and PGs near your college</p>
       <div class="search-bar">
-        <input type="text" id="searchInput" placeholder="Search by name or location..." />
-        <button onclick="filterHostels()">Search</button>
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Search by name or location..."
+          oninput="debounceSearch()"
+        />
+        <button onclick="triggerSearch()">Search</button>
       </div>
     </div>
   </section>
 
-  <!-- FILTERS -->
-  <section class="filters">
-    <div class="container">
-      <span class="filter-label">Filter by:</span>
-      <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
-      <button class="filter-btn" onclick="setFilter('Student', this)">Boys</button>
-      <button class="filter-btn" onclick="setFilter('Girl', this)">Girls</button>
-      <button class="filter-btn" onclick="setFilter('budget', this)">Under ₹5000</button>
-    </div>
-  </section>
-
-  <!-- HOSTEL CARDS GRID -->
+  <!-- MAIN LAYOUT: FILTER SIDEBAR + CARDS -->
   <section class="browse-section">
-    <div class="container">
-      <h2 class="section-title">Available Hostels <span id="count"></span></h2>
-      <div class="hostel-grid" id="hostelGrid">
-        <!-- Cards injected by JS -->
-      </div>
-      <p class="no-results" id="noResults" style="display:none;">
-        No hostels found. Try a different search.
-      </p>
+    <div class="container browse-layout">
+
+      <!-- FILTER SIDEBAR -->
+      <aside class="filter-sidebar">
+        <div class="sidebar-header">
+          <h3>🔍 Filters</h3>
+          <button class="btn-reset-small" onclick="resetAllFilters()">Reset</button>
+        </div>
+
+        <!-- Price Range -->
+        <div class="filter-group">
+          <label>💰 Monthly Budget</label>
+          <div class="price-display">
+            <span id="price-min-display">₹1,000</span>
+            <span>—</span>
+            <span id="price-max-display">₹20,000</span>
+          </div>
+          <input type="range" id="price-min" min="1000" max="20000"
+            step="500" value="1000"
+            oninput="onPriceMin(this.value)" />
+          <input type="range" id="price-max" min="1000" max="20000"
+            step="500" value="20000"
+            oninput="onPriceMax(this.value)" />
+          <div class="range-labels">
+            <span>₹1,000</span><span>₹20,000</span>
+          </div>
+        </div>
+
+        <!-- Room Type -->
+        <div class="filter-group">
+          <label>🛏️ Room Type</label>
+          <div class="chip-group">
+            <button class="chip active" onclick="setRoomType(this, '')">Any</button>
+            <button class="chip" onclick="setRoomType(this, 'single')">Single</button>
+            <button class="chip" onclick="setRoomType(this, 'twin')">Twin</button>
+            <button class="chip" onclick="setRoomType(this, 'triple')">Triple</button>
+          </div>
+        </div>
+
+        <!-- Gender -->
+        <div class="filter-group">
+          <label>👤 Hostel For</label>
+          <select id="gender-filter" onchange="onFilterChange()">
+            <option value="">Any</option>
+            <option value="boys">Boys</option>
+            <option value="girls">Girls</option>
+            <option value="coed">Co-ed</option>
+          </select>
+        </div>
+
+        <!-- Mess -->
+        <div class="filter-group">
+          <label>🍽️ Mess</label>
+          <select id="mess-filter" onchange="onFilterChange()">
+            <option value="">Any</option>
+            <option value="veg">Vegetarian</option>
+            <option value="nonveg">Non-Veg</option>
+            <option value="both">Both</option>
+          </select>
+        </div>
+
+        <!-- Amenities -->
+        <div class="filter-group">
+          <label>✅ Amenities</label>
+          <div class="check-list">
+            <label class="check-item">
+              <input type="checkbox" value="wifi" onchange="onFilterChange()"/> Wi-Fi
+            </label>
+            <label class="check-item">
+              <input type="checkbox" value="cctv" onchange="onFilterChange()"/> CCTV
+            </label>
+            <label class="check-item">
+              <input type="checkbox" value="power_backup" onchange="onFilterChange()"/> Power Backup
+            </label>
+            <label class="check-item">
+              <input type="checkbox" value="laundry" onchange="onFilterChange()"/> Laundry
+            </label>
+          </div>
+        </div>
+
+        <button class="btn-apply-full" onclick="triggerSearch()">
+          Apply Filters
+        </button>
+      </aside>
+
+      <!-- CARDS AREA -->
+      <main class="cards-area">
+        <div class="results-header">
+          <h2 class="section-title">
+            Available Hostels <span id="count"></span>
+          </h2>
+          <!-- Loading indicator -->
+          <div id="loadingIndicator" class="loading-indicator" style="display:none;">
+            <div class="spinner"></div>
+            <span>Searching...</span>
+          </div>
+        </div>
+
+        <!-- Skeleton Loaders (shown during fetch) -->
+        <div id="skeletonGrid" class="hostel-grid" style="display:none;">
+          <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-line w80"></div><div class="skeleton-line w60"></div><div class="skeleton-line w40"></div></div>
+          <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-line w80"></div><div class="skeleton-line w60"></div><div class="skeleton-line w40"></div></div>
+          <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-line w80"></div><div class="skeleton-line w60"></div><div class="skeleton-line w40"></div></div>
+          <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-line w80"></div><div class="skeleton-line w60"></div><div class="skeleton-line w40"></div></div>
+        </div>
+
+        <!-- Real Cards Grid -->
+        <div class="hostel-grid" id="hostelGrid"></div>
+
+        <!-- No Results -->
+        <p class="no-results" id="noResults" style="display:none;">
+          No hostels found matching your filters. Try adjusting them.
+        </p>
+      </main>
+
     </div>
   </section>
 
