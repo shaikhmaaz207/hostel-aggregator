@@ -1,32 +1,22 @@
 # hostels/views.py
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from users.permissions import IsOwner
+from users.authentication import CustomJWTAuthentication
 from .models import Hostel
 from .serializers import HostelSerializer
-from .validators import validate_search_params     # ← NEW import
-
+from .validators import validate_search_params
+from PIL import Image
+from django.core.files.base import ContentFile
+import io
 
 class HostelListView(APIView):
-    """
-    GET /api/hostels/
-
-    Accepted query parameters:
-        max_price   → positive number   e.g. ?max_price=5000
-        room_type   → single/double/triple/quadruple
-        location    → text string       e.g. ?location=Aurangabad
-        sort        → price_asc / price_desc
-    """
     permission_classes = [AllowAny]
 
     def get(self, request):
-
-        # ── STEP 1: Run validation BEFORE touching the database ──
         result = validate_search_params(request.query_params)
-
-        # If validator found any errors, return 400 immediately
         if 'errors' in result:
             return Response(
                 {
@@ -35,28 +25,18 @@ class HostelListView(APIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
-
-        # All params are clean — use the sanitized values
         cleaned = result.get('cleaned', {})
-
-        # ── STEP 2: Start with all hostels ──
         queryset = Hostel.objects.all()
 
-        # ── STEP 3: Apply filters using cleaned values ──
         if 'max_price' in cleaned:
             queryset = queryset.filter(rent_amount__lte=cleaned['max_price'])
-
         if 'room_type' in cleaned:
             queryset = queryset.filter(
                 rooms__room_type__icontains=cleaned['room_type']
             ).distinct()
-
         if 'location' in cleaned:
-            queryset = queryset.filter(
-                address__icontains=cleaned['location']
-            )
+            queryset = queryset.filter(address__icontains=cleaned['location'])
 
-        # ── STEP 4: Apply sorting ──
         if cleaned.get('sort') == 'price_asc':
             queryset = queryset.order_by('rent_amount')
         elif cleaned.get('sort') == 'price_desc':
@@ -64,6 +44,61 @@ class HostelListView(APIView):
         else:
             queryset = queryset.order_by('-created_at')
 
-        # ── STEP 5: Serialize and return ──
         serializer = HostelSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class CreateHostelView(APIView):
+    authentication_classes = [CustomJWTAuthentication]
+    permission_classes = [IsAuthenticated, IsOwner]
+
+    def post(self, request):
+        serializer = HostelSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(owner=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(
+            {"errors": serializer.errors},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+
+class UploadHostelImageView(APIView):
+    authentication_classes = [CustomJWTAuthentication]
+    permission_classes = [IsAuthenticated, IsOwner]
+
+    def post(self, request, hostel_id):
+        try:
+            hostel = Hostel.objects.get(id=hostel_id, owner=request.user)
+        except Hostel.DoesNotExist:
+            return Response(
+                {"error": "Hostel not found or you don't own it"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if 'image' not in request.FILES:
+            return Response(
+                {"error": "No image file provided"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        image_file = request.FILES['image']
+        img = Image.open(image_file)
+
+        if img.mode in ('RGBA', 'P'):
+            img = img.convert('RGB')
+
+        max_size = (800, 600)
+        img.thumbnail(max_size, Image.LANCZOS)
+
+        output = io.BytesIO()
+        img.save(output, format='JPEG', quality=85, optimize=True)
+        output.seek(0)
+
+        filename = f"hostel_{hostel_id}_{image_file.name}"
+        hostel.image.save(filename, ContentFile(output.read()), save=True)
+
+        return Response({
+            "message": "Image uploaded successfully",
+            "image_url": request.build_absolute_uri(hostel.image.url)
+        }, status=status.HTTP_200_OK)
