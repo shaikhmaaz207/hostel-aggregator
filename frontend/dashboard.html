@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Owner Dashboard — HostelFinder</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="css/dashboard.css"/>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="nav-brand">🏠 HostelFinder</div>
+    <div class="nav-links">
+      <a href="index.html">← Browse</a>
+      <span class="nav-owner-name" id="ownerName"></span>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <!-- ACCESS DENIED (shown to students) -->
+  <div id="accessDenied" style="display:none;">
+    <div class="access-denied-box">
+      <div class="denied-icon">🚫</div>
+      <h1>Access Denied</h1>
+      <p>This dashboard is only accessible to registered hostel owners.</p>
+      <p>You are logged in as a <strong>Student</strong> account.</p>
+      <a href="index.html" class="btn-back-browse">← Back to Browse</a>
+    </div>
+  </div>
+
+  <!-- NOT LOGGED IN -->
+  <div id="notLoggedIn" style="display:none;">
+    <div class="access-denied-box">
+      <div class="denied-icon">🔒</div>
+      <h1>Login Required</h1>
+      <p>Please login as a hostel owner to access this dashboard.</p>
+      <a href="login.html" class="btn-back-browse">→ Go to Login</a>
+    </div>
+  </div>
+
+  <!-- DASHBOARD CONTENT (shown to owners only) -->
+  <div id="dashboardContent" style="display:none;">
+
+    <!-- DASHBOARD HEADER -->
+    <div class="dashboard-header">
+      <div class="container">
+        <div class="dashboard-header-left">
+          <h1>My Properties</h1>
+          <p id="dashboardSubtitle">Managing your hostel listings</p>
+        </div>
+        <div class="dashboard-header-right">
+          <a href="add-hostel.html" class="btn-add-hostel">+ Add New Hostel</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATS ROW -->
+    <div class="container">
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-number" id="totalListings">0</div>
+          <div class="stat-label">Total Listings</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="totalRevenue">₹0</div>
+          <div class="stat-label">Monthly Revenue</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">⭐ N/A</div>
+          <div class="stat-label">Avg. Rating</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROPERTY LISTINGS -->
+    <div class="container">
+      <h2 class="section-title">Your Hostel Listings</h2>
+      <div id="loadingState" class="dash-loading">
+        Loading your properties...
+      </div>
+      <div class="hostel-grid" id="ownerHostelGrid"></div>
+      <div id="noHostels" style="display:none;" class="no-hostels-box">
+        <div class="no-hostels-icon">🏠</div>
+        <h3>No listings yet!</h3>
+        <p>You haven't added any hostels yet. Add your first property now.</p>
+        <a href="add-hostel.html" class="btn-add-hostel">+ Add Your First Hostel</a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <p>© 2026 HostelFinder · Owner Dashboard</p>
+  </footer>
+
+  <script src="js/dashboard.js"></script>
+
+</body>
+</html>
