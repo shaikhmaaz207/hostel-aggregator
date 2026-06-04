@@ -74,3 +74,19 @@ class UploadHostelImageView(APIView):
             "message": "Image uploaded successfully",
             "image_url": request.build_absolute_uri(hostel.image.url)
         }, status=status.HTTP_200_OK)
+from rest_framework import generics, permissions, status
+from rest_framework.response import Response
+from .models import HostelImage
+from .serializers import HostelImageSerializer
+
+class HostelImageListCreateView(generics.ListCreateAPIView):
+    serializer_class   = HostelImageSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        hostel_id = self.kwargs['hostel_id']
+        return HostelImage.objects.filter(hostel_id=hostel_id)
+
+    def perform_create(self, serializer):
+        hostel_id = self.kwargs['hostel_id']
+        serializer.save(hostel_id=hostel_id)

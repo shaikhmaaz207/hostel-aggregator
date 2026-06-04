@@ -19,3 +19,18 @@ class Hostel(models.Model):
 
     def __str__(self):
         return self.title
+class HostelImage(models.Model):
+    id         = models.AutoField(primary_key=True)
+    hostel     = models.ForeignKey(
+                     'Hostel',
+                     on_delete=models.CASCADE,
+                     related_name='images'
+                 )
+    image_url  = models.URLField(max_length=500)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'hostel_images'
+
+    def __str__(self):
+        return f"Image {self.id} → Hostel {self.hostel_id}"

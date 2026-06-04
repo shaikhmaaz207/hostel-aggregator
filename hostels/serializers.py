@@ -31,3 +31,10 @@ class HostelCreateSerializer(serializers.ModelSerializer):
             'rent_amount': {'required': True},
             'address': {'required': True},
         }
+from .models import HostelImage   # add this import at the top if not already there
+
+class HostelImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = HostelImage
+        fields = ['id', 'hostel', 'image_url', 'uploaded_at']
+        read_only_fields = ['id', 'uploaded_at']
