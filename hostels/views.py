@@ -1,3 +1,4 @@
+# hostels/views.py
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -6,17 +7,44 @@ from users.permissions import IsOwner
 from users.authentication import CustomJWTAuthentication
 from .models import Hostel
 from .serializers import HostelSerializer
+from .validators import validate_search_params
 from PIL import Image
 from django.core.files.base import ContentFile
 import io
-import os
 
-class GetHostelsView(APIView):
+class HostelListView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
-        hostels = Hostel.objects.all()
-        serializer = HostelSerializer(hostels, many=True)
+        result = validate_search_params(request.query_params)
+        if 'errors' in result:
+            return Response(
+                {
+                    "error": "Invalid query parameters.",
+                    "details": result['errors']
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        cleaned = result.get('cleaned', {})
+        queryset = Hostel.objects.all()
+
+        if 'max_price' in cleaned:
+            queryset = queryset.filter(rent_amount__lte=cleaned['max_price'])
+        if 'room_type' in cleaned:
+            queryset = queryset.filter(
+                rooms__room_type__icontains=cleaned['room_type']
+            ).distinct()
+        if 'location' in cleaned:
+            queryset = queryset.filter(address__icontains=cleaned['location'])
+
+        if cleaned.get('sort') == 'price_asc':
+            queryset = queryset.order_by('rent_amount')
+        elif cleaned.get('sort') == 'price_desc':
+            queryset = queryset.order_by('-rent_amount')
+        else:
+            queryset = queryset.order_by('-created_at')
+
+        serializer = HostelSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
