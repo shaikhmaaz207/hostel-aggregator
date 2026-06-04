@@ -1,0 +1,244 @@
+/* ── Variables ── */
+:root {
+  --primary:   #2563eb;
+  --primary-light: #eff6ff;
+  --accent:    #f59e0b;
+  --bg:        #f1f5f9;
+  --card:      #ffffff;
+  --text:      #1e293b;
+  --muted:     #64748b;
+  --border:    #e2e8f0;
+  --radius:    12px;
+  --shadow:    0 4px 24px rgba(0,0,0,0.08);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 24px 16px;
+}
+
+/* ── Wrapper ── */
+.filter-wrapper {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ── Header ── */
+.filter-header {
+  margin-bottom: 20px;
+}
+.filter-header h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+.filter-header p {
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+/* ── Card ── */
+.filter-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ── Filter Group ── */
+.filter-group label:first-child {
+  display: block;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+  color: var(--text);
+}
+
+/* ── Text Input ── */
+input[type="text"],
+select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: var(--text);
+  background: #fff;
+  transition: border 0.2s;
+  outline: none;
+}
+input[type="text"]:focus,
+select:focus {
+  border-color: var(--primary);
+}
+
+/* ── Price Range ── */
+.price-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 12px;
+}
+
+.range-track {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+input[type="range"] {
+  width: 100%;
+  accent-color: var(--primary);
+  cursor: pointer;
+  height: 6px;
+}
+
+.range-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+/* ── Chips ── */
+.chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  padding: 8px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 999px;
+  background: #fff;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+  color: var(--muted);
+}
+.chip:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.chip.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+/* ── Checkboxes ── */
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.check-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  transition: all 0.2s;
+}
+.check-item:hover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+.check-item input[type="checkbox"] {
+  accent-color: var(--primary);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+.check-item input:checked + span {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* ── Action Buttons ── */
+.filter-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-reset {
+  flex: 1;
+  padding: 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--muted);
+  transition: all 0.2s;
+}
+.btn-reset:hover {
+  border-color: #dc2626;
+  color: #dc2626;
+}
+
+.btn-apply {
+  flex: 2;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-apply:hover {
+  background: #1d4ed8;
+}
+
+/* ── State Display ── */
+.state-display {
+  margin-top: 20px;
+  background: #1e293b;
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  color: #94a3b8;
+}
+.state-display h4 {
+  color: #f1f5f9;
+  margin-bottom: 10px;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+#state-output {
+  font-size: 0.82rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  color: #4ade80;
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .filter-card { padding: 20px 16px; }
+  .checkbox-grid { grid-template-columns: 1fr; }
+  .filter-actions { flex-direction: column; }
+  .filter-header h2 { font-size: 1.4rem; }
+}

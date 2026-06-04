@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hostel Filter</title>
+  <link rel="stylesheet" href="css/filter.css" />
+</head>
+<body>
+
+  <div class="filter-wrapper">
+    <div class="filter-header">
+      <h2>Find Your Hostel</h2>
+      <p>Use filters to narrow down your options</p>
+    </div>
+
+    <div class="filter-card">
+
+      <!-- Location -->
+      <div class="filter-group">
+        <label for="location">📍 Location / College Name</label>
+        <input
+          type="text"
+          id="location"
+          placeholder="e.g. Aurangabad, MGM College..."
+          oninput="updateState('location', this.value)"
+        />
+      </div>
+
+      <!-- Price Range -->
+      <div class="filter-group">
+        <label>💰 Monthly Budget</label>
+        <div class="price-display">
+          <span id="price-min-display">₹2,000</span>
+          <span>—</span>
+          <span id="price-max-display">₹10,000</span>
+        </div>
+        <div class="range-track">
+          <input
+            type="range"
+            id="price-min"
+            min="1000" max="20000"
+            step="500"
+            value="2000"
+            oninput="updatePriceMin(this.value)"
+          />
+          <input
+            type="range"
+            id="price-max"
+            min="1000" max="20000"
+            step="500"
+            value="10000"
+            oninput="updatePriceMax(this.value)"
+          />
+        </div>
+        <div class="range-labels">
+          <span>₹1,000</span>
+          <span>₹20,000</span>
+        </div>
+      </div>
+
+      <!-- Room Type -->
+      <div class="filter-group">
+        <label>🛏️ Room Type</label>
+        <div class="chip-group">
+          <button class="chip active" onclick="toggleChip(this, 'roomType', 'Any')">Any</button>
+          <button class="chip" onclick="toggleChip(this, 'roomType', 'Single')">Single</button>
+          <button class="chip" onclick="toggleChip(this, 'roomType', 'Twin')">Twin</button>
+          <button class="chip" onclick="toggleChip(this, 'roomType', 'Triple')">Triple</button>
+          <button class="chip" onclick="toggleChip(this, 'roomType', 'Quadruple')">Quadruple</button>
+        </div>
+      </div>
+
+      <!-- Gender -->
+      <div class="filter-group">
+        <label for="gender">👤 Hostel For</label>
+        <select id="gender" onchange="updateState('gender', this.value)">
+          <option value="">-- Select --</option>
+          <option value="boys">Boys</option>
+          <option value="girls">Girls</option>
+          <option value="coed">Co-ed</option>
+        </select>
+      </div>
+
+      <!-- Mess -->
+      <div class="filter-group">
+        <label for="mess">🍽️ Mess / Food</label>
+        <select id="mess" onchange="updateState('mess', this.value)">
+          <option value="">-- Any --</option>
+          <option value="veg">Pure Vegetarian</option>
+          <option value="nonveg">Non-Vegetarian</option>
+          <option value="both">Both Available</option>
+          <option value="none">No Mess</option>
+        </select>
+      </div>
+
+      <!-- Amenities -->
+      <div class="filter-group">
+        <label>✅ Amenities</label>
+        <div class="checkbox-grid">
+          <label class="check-item">
+            <input type="checkbox" value="wifi" onchange="toggleAmenity(this)"/>
+            <span>📶 Wi-Fi</span>
+          </label>
+          <label class="check-item">
+            <input type="checkbox" value="cctv" onchange="toggleAmenity(this)"/>
+            <span>📷 CCTV</span>
+          </label>
+          <label class="check-item">
+            <input type="checkbox" value="power_backup" onchange="toggleAmenity(this)"/>
+            <span>🔋 Power Backup</span>
+          </label>
+          <label class="check-item">
+            <input type="checkbox" value="laundry" onchange="toggleAmenity(this)"/>
+            <span>👕 Laundry</span>
+          </label>
+          <label class="check-item">
+            <input type="checkbox" value="attached_washroom" onchange="toggleAmenity(this)"/>
+            <span>🚿 Attached Washroom</span>
+          </label>
+          <label class="check-item">
+            <input type="checkbox" value="security_guard" onchange="toggleAmenity(this)"/>
+            <span>💂 Security Guard</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Curfew -->
+      <div class="filter-group">
+        <label for="curfew">🕐 Curfew Time</label>
+        <select id="curfew" onchange="updateState('curfew', this.value)">
+          <option value="">-- Any --</option>
+          <option value="2100">9:00 PM</option>
+          <option value="2200">10:00 PM</option>
+          <option value="2300">11:00 PM</option>
+          <option value="none">No Curfew</option>
+        </select>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="filter-actions">
+        <button class="btn-reset" onclick="resetFilters()">Reset</button>
+        <button class="btn-apply" onclick="applyFilters()">Apply Filters</button>
+      </div>
+
+    </div>
+
+    <!-- Live State Display (for verification) -->
+    <div class="state-display">
+      <h4>Active Filters (State)</h4>
+      <pre id="state-output">{}</pre>
+    </div>
+
+  </div>
+
+  <script src="js/filter.js"></script>
+</body>
+</html>
