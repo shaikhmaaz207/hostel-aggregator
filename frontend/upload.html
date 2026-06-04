@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Images — HostelFinder</title>
+    <link rel="stylesheet" href="css/upload.css">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-brand">🏠 HostelFinder</div>
+        <div class="nav-links">
+            <a href="dashboard.html">← Back to Dashboard</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="upload-container">
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1>Upload Property Images</h1>
+            <p id="hostel-name-display">Loading hostel info...</p>
+        </div>
+
+        <!-- Drag & Drop Zone -->
+        <div class="drop-zone" id="dropZone">
+            <div class="drop-zone-content">
+                <div class="drop-icon">📁</div>
+                <h3>Drag & Drop Images Here</h3>
+                <p>or</p>
+                <label class="select-btn" for="fileInput">
+                    Browse Files
+                </label>
+                <input type="file" id="fileInput" multiple accept="image/*" hidden>
+                <p class="file-hint">Supports: JPG, PNG, WEBP — Max 5MB each</p>
+            </div>
+        </div>
+
+        <!-- Selected Files Preview -->
+        <div class="preview-section" id="previewSection" style="display:none;">
+            <h3>Selected Images (<span id="fileCount">0</span>)</h3>
+            <div class="preview-grid" id="previewGrid"></div>
+            <button class="upload-btn" id="uploadBtn">
+                ⬆️ Upload All Images
+            </button>
+        </div>
+
+        <!-- Upload Progress -->
+        <div class="progress-section" id="progressSection" style="display:none;">
+            <h3>Uploading...</h3>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <p id="progressText">0 of 0 uploaded</p>
+        </div>
+
+        <!-- Live Gallery -->
+        <div class="gallery-section" id="gallerySection">
+            <h3>Current Property Images</h3>
+            <div class="gallery-grid" id="galleryGrid">
+                <p class="no-images" id="noImagesMsg">No images uploaded yet.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="js/upload.js"></script>
+</body>
+</html>

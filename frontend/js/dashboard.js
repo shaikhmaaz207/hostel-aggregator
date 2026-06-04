@@ -2,25 +2,21 @@ const API_BASE = 'http://127.0.0.1:8000/api';
 const emojis = ['🏢', '🏠', '🏨', '🏡', '🏘', '🏰'];
 
 // ── ROUTE PROTECTOR ──
-// Checks token and role before showing dashboard
 function checkAuth() {
   const token = localStorage.getItem('access_token');
   const role = localStorage.getItem('role');
   const name = localStorage.getItem('user_name');
 
-  // Not logged in
   if (!token) {
     document.getElementById('notLoggedIn').style.display = 'block';
     return false;
   }
 
-  // Logged in but Student role
   if (role !== 'Owner') {
     document.getElementById('accessDenied').style.display = 'block';
     return false;
   }
 
-  // Owner — show dashboard
   document.getElementById('dashboardContent').style.display = 'block';
   document.getElementById('ownerName').textContent = `👤 ${name || 'Owner'}`;
   return true;
@@ -39,7 +35,6 @@ async function fetchOwnerHostels() {
 
     const allHostels = await response.json();
 
-    // Hide loading
     document.getElementById('loadingState').style.display = 'none';
 
     if (allHostels.length === 0) {
@@ -47,7 +42,6 @@ async function fetchOwnerHostels() {
       return;
     }
 
-    // Update stats
     const totalRevenue = allHostels.reduce((sum, h) => sum + Number(h.rent_amount), 0);
     document.getElementById('totalListings').textContent = allHostels.length;
     document.getElementById('totalRevenue').textContent = `₹${totalRevenue.toLocaleString()}`;
@@ -92,6 +86,9 @@ function renderOwnerHostels(hostels) {
             <button class="btn-edit" onclick="editHostel(${hostel.id})">
               ✏️ Edit
             </button>
+            <button class="btn-upload" onclick="uploadImages(${hostel.id})">
+              🖼️ Images
+            </button>
             <button class="btn-delete" onclick="deleteHostel(${hostel.id})">
               🗑️ Delete
             </button>
@@ -107,12 +104,17 @@ function viewHostel(id) {
   window.location.href = `detail.html?id=${id}`;
 }
 
-// ── EDIT HOSTEL (placeholder) ──
+// ── EDIT HOSTEL ──
 function editHostel(id) {
   alert(`Edit hostel ID ${id} — coming in next sprint!`);
 }
 
-// ── DELETE HOSTEL (placeholder) ──
+// ── UPLOAD IMAGES ──
+function uploadImages(id) {
+  window.location.href = `upload.html?hostel_id=${id}`;
+}
+
+// ── DELETE HOSTEL ──
 function deleteHostel(id) {
   if (confirm(`Are you sure you want to delete hostel ID ${id}?`)) {
     alert(`Delete functionality coming in next sprint!`);
