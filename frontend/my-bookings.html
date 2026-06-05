@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Bookings — HostelFinder</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="css/my-bookings.css"/>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="nav-brand">🏠 HostelFinder</div>
+    <div class="nav-links">
+      <a href="index.html">← Browse</a>
+      <span class="nav-owner-name" id="studentName"></span>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <!-- NOT LOGGED IN -->
+  <div id="notLoggedIn" style="display:none;">
+    <div class="access-denied-box">
+      <div class="denied-icon">🔒</div>
+      <h1>Login Required</h1>
+      <p>Please login as a student to view your bookings.</p>
+      <a href="login.html" class="btn-back-browse">→ Go to Login</a>
+    </div>
+  </div>
+
+  <!-- WRONG ROLE -->
+  <div id="wrongRole" style="display:none;">
+    <div class="access-denied-box">
+      <div class="denied-icon">🚫</div>
+      <h1>Students Only</h1>
+      <p>This page is only for student accounts.</p>
+      <a href="dashboard.html" class="btn-back-browse">→ Go to Owner Dashboard</a>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div id="mainContent" style="display:none;">
+
+    <!-- PAGE HEADER -->
+    <div class="bookings-header">
+      <div class="container">
+        <h1>My Bookings</h1>
+        <p id="bookingsSubtitle">Track all your hostel booking requests</p>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="container">
+      <div class="booking-stats">
+        <div class="bstat-card">
+          <div class="bstat-number" id="totalBookings">0</div>
+          <div class="bstat-label">Total Requests</div>
+        </div>
+        <div class="bstat-card">
+          <div class="bstat-number pending" id="pendingCount">0</div>
+          <div class="bstat-label">Pending</div>
+        </div>
+        <div class="bstat-card">
+          <div class="bstat-number approved" id="approvedCount">0</div>
+          <div class="bstat-label">Approved</div>
+        </div>
+        <div class="bstat-card">
+          <div class="bstat-number rejected" id="rejectedCount">0</div>
+          <div class="bstat-label">Rejected</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOOKINGS LIST -->
+    <div class="container">
+      <div id="loadingState" class="bookings-loading">
+        Loading your bookings...
+      </div>
+      <div id="bookingsList"></div>
+      <div id="noBookings" style="display:none;" class="no-bookings-box">
+        <div class="no-bookings-icon">📋</div>
+        <h3>No bookings yet!</h3>
+        <p>You haven't requested any hostels yet.</p>
+        <a href="index.html" class="btn-browse-now">Browse Hostels →</a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <p>© 2026 HostelFinder · Student Bookings</p>
+  </footer>
+
+  <script src="js/my-bookings.js"></script>
+
+</body>
+</html>
+
