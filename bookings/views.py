@@ -14,7 +14,6 @@ class CreateBookingView(APIView):
     permission_classes     = [IsAuthenticated, IsStudent]
 
     def post(self, request):
-        # Check if student already has pending booking for same hostel
         hostel_id = request.data.get('hostel')
         existing  = Booking.objects.filter(
             student=request.user,
@@ -31,8 +30,6 @@ class CreateBookingView(APIView):
         serializer = BookingSerializer(data=request.data)
         if serializer.is_valid():
             booking = serializer.save(student=request.user)
-
-            # ── NOTIFY OWNER in real-time ──
             owner_id = booking.hostel.owner.id
             send_notification(
                 user_id    = owner_id,
@@ -46,7 +43,6 @@ class CreateBookingView(APIView):
                     'status':       booking.status,
                 }
             )
-
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -56,7 +52,6 @@ class UpdateBookingStatusView(APIView):
     permission_classes     = [IsAuthenticated, IsOwner]
 
     def patch(self, request, booking_id):
-        # Explicitly block students
         if request.user.role == 'Student':
             return Response(
                 {"error": "Students cannot update booking status"},
@@ -77,8 +72,6 @@ class UpdateBookingStatusView(APIView):
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        old_status = booking.status
-
         serializer = BookingStatusSerializer(
             booking,
             data=request.data,
@@ -88,7 +81,6 @@ class UpdateBookingStatusView(APIView):
             updated_booking = serializer.save()
             new_status = updated_booking.status
 
-            # ── NOTIFY STUDENT in real-time ──
             if new_status == 'Approved':
                 send_notification(
                     user_id    = booking.student.id,
@@ -113,7 +105,6 @@ class UpdateBookingStatusView(APIView):
                         'status':       new_status,
                     }
                 )
-
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -132,3 +123,28 @@ class GetBookingsView(APIView):
 
         serializer = BookingSerializer(bookings, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class OwnerBookingRequestsView(APIView):
+    authentication_classes = [CustomJWTAuthentication]
+    permission_classes     = [IsAuthenticated, IsOwner]
+
+    def get(self, request):
+        bookings = Booking.objects.filter(
+            hostel__owner=request.user
+        ).order_by('-created_at')
+
+        data = []
+        for booking in bookings:
+            data.append({
+                'id':           booking.id,
+                'student_name': booking.student.name,
+                'student_id':   booking.student.id,
+                'hostel_title': booking.hostel.title,
+                'hostel_id':    booking.hostel.id,
+                'booking_date': booking.booking_date,
+                'status':       booking.status,
+                'created_at':   booking.created_at,
+            })
+
+        return Response(data, status=status.HTTP_200_OK)

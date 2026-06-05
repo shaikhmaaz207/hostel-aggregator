@@ -27,17 +27,14 @@ function checkAuth() {
 // TAB SWITCHER
 // ────────────────────────────────────────
 function switchTab(tab) {
-  // Toggle panels
   document.getElementById('panel-listings').style.display =
     tab === 'listings' ? 'block' : 'none';
   document.getElementById('panel-requests').style.display =
     tab === 'requests' ? 'block' : 'none';
 
-  // Toggle tab button active state
   document.getElementById('tab-listings').classList.toggle('active', tab === 'listings');
   document.getElementById('tab-requests').classList.toggle('active', tab === 'requests');
 
-  // Load requests when tab is opened
   if (tab === 'requests') fetchBookingRequests();
 }
 
@@ -95,8 +92,8 @@ async function fetchBookingRequests() {
 
     document.getElementById('requestsLoading').style.display = 'none';
 
-    // Update pending count in stats and badge
-    const pending = requests.filter(r => r.status === 'pending').length;
+    // ✅ Fixed: use 'Pending' not 'pending'
+    const pending = requests.filter(r => r.status === 'Pending').length;
     document.getElementById('totalRequests').textContent = pending;
 
     if (pending > 0) {
@@ -135,32 +132,35 @@ function renderRequestsTable(requests) {
   `;
 
   requests.forEach(req => {
-    const date   = new Date(req.created_at).toLocaleDateString('en-IN', {
+    const date = new Date(req.created_at).toLocaleDateString('en-IN', {
       day: 'numeric', month: 'short', year: 'numeric'
     });
-    const isPending  = req.status === 'pending';
-    const isAccepted = req.status === 'accepted';
-    const isDeclined = req.status === 'declined';
+
+    // ✅ Fixed: use 'Pending', 'Approved', 'Rejected'
+    const isPending  = req.status === 'Pending';
+    const isAccepted = req.status === 'Approved';
+    const isDeclined = req.status === 'Rejected';
 
     const statusBadge = isAccepted
-      ? '<span class="status-badge accepted">✅ Accepted</span>'
+      ? '<span class="status-badge accepted">✅ Approved</span>'
       : isDeclined
-      ? '<span class="status-badge declined">❌ Declined</span>'
+      ? '<span class="status-badge declined">❌ Rejected</span>'
       : '<span class="status-badge pending">⏳ Pending</span>';
 
+    // ✅ Fixed: use 'Approved' and 'Rejected'
     const actionBtns = isPending ? `
-      <button class="btn-accept" onclick="updateRequestStatus(${req.id}, 'accepted')">
+      <button class="btn-accept" onclick="updateRequestStatus(${req.id}, 'Approved')">
         Accept Request
       </button>
-      <button class="btn-decline" onclick="updateRequestStatus(${req.id}, 'declined')">
+      <button class="btn-decline" onclick="updateRequestStatus(${req.id}, 'Rejected')">
         Decline Request
       </button>
     ` : `<span class="action-done">—</span>`;
 
     html += `
       <div class="request-row" id="request-row-${req.id}">
-        <span class="req-student">👤 ${req.student_name || req.student || 'Student'}</span>
-        <span class="req-hostel">🏠 ${req.hostel_title || req.hostel || 'Hostel'}</span>
+        <span class="req-student">👤 ${req.student_name || 'Student'}</span>
+        <span class="req-hostel">🏠 ${req.hostel_title || 'Hostel'}</span>
         <span class="req-date">📅 ${date}</span>
         <span class="req-status">${statusBadge}</span>
         <span class="req-actions">${actionBtns}</span>
@@ -178,13 +178,13 @@ function renderRequestsTable(requests) {
 async function updateRequestStatus(requestId, newStatus) {
   const token = localStorage.getItem('access_token');
 
-  // Disable buttons immediately to prevent double clicks
-  const row = document.getElementById(`request-row-${requestId}`);
+  const row  = document.getElementById(`request-row-${requestId}`);
   const btns = row.querySelectorAll('button');
   btns.forEach(b => { b.disabled = true; b.style.opacity = '0.5'; });
 
   try {
-    const response = await fetch(`${API_BASE}/bookings/requests/${requestId}/status/`, {
+    // ✅ Fixed: correct URL without 'requests/'
+    const response = await fetch(`${API_BASE}/bookings/${requestId}/status/`, {
       method:  'PATCH',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -195,11 +195,9 @@ async function updateRequestStatus(requestId, newStatus) {
 
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-    // Refresh the panel with updated data
     await fetchBookingRequests();
 
   } catch (error) {
-    // Re-enable buttons if request failed
     btns.forEach(b => { b.disabled = false; b.style.opacity = '1'; });
     alert(`Failed to update request. Please try again.\nError: ${error.message}`);
   }
@@ -245,10 +243,10 @@ function renderOwnerHostels(hostels) {
 // ────────────────────────────────────────
 // HELPER FUNCTIONS
 // ────────────────────────────────────────
-function viewHostel(id)    { window.location.href = `detail.html?id=${id}`; }
-function editHostel(id)    { alert(`Edit hostel ID ${id} — coming soon!`); }
-function uploadImages(id)  { window.location.href = `upload.html?hostel_id=${id}`; }
-function deleteHostel(id)  {
+function viewHostel(id)   { window.location.href = `detail.html?id=${id}`; }
+function editHostel(id)   { alert(`Edit hostel ID ${id} — coming soon!`); }
+function uploadImages(id) { window.location.href = `upload.html?hostel_id=${id}`; }
+function deleteHostel(id) {
   if (confirm(`Are you sure you want to delete hostel ID ${id}?`)) {
     alert('Delete functionality coming in next sprint!');
   }
@@ -268,6 +266,5 @@ function logout() {
 const allowed = checkAuth();
 if (allowed) {
   fetchOwnerHostels();
-  // Pre-fetch requests count for badge
   fetchBookingRequests();
 }

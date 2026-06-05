@@ -157,3 +157,7 @@ CHANNEL_LAYERS = {
         'BACKEND': 'channels.layers.InMemoryChannelLayer'
     }
 }
+
+# Force UTF-8 encoding
+DEFAULT_CHARSET = 'utf-8'
+FILE_CHARSET = 'utf-8'
