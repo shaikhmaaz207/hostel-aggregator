@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chat — HostelFinder</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="css/chat.css"/>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="nav-brand">🏠 HostelFinder</div>
+    <div class="nav-links">
+      <a href="#" onclick="goBack()">← Back to Hostel</a>
+    </div>
+  </nav>
+
+  <!-- CHAT WRAPPER -->
+  <div class="chat-wrapper">
+
+    <!-- CHAT HEADER -->
+    <div class="chat-header">
+      <div class="chat-avatar">🏠</div>
+      <div class="chat-header-info">
+        <div class="chat-hostel-name" id="chatHostelName">Loading...</div>
+        <div class="chat-status" id="chatStatus">
+          <span class="status-dot"></span>
+          <span id="statusText">Connecting...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MESSAGE HISTORY PANE -->
+    <div class="chat-messages" id="chatMessages">
+
+      <!-- System message -->
+      <div class="system-message">
+        Chat started — ask the owner about rules, amenities, or moving dates.
+      </div>
+
+      <!-- Messages injected by JS -->
+    </div>
+
+    <!-- TYPING INDICATOR -->
+    <div class="typing-indicator" id="typingIndicator" style="display:none;">
+      <span></span><span></span><span></span>
+      Owner is typing...
+    </div>
+
+    <!-- INPUT BAR -->
+    <div class="chat-input-bar">
+      <input
+        type="text"
+        id="messageInput"
+        placeholder="Type a message..."
+        maxlength="500"
+        onkeydown="handleKeyDown(event)"
+      />
+      <button class="btn-send" id="sendBtn" onclick="sendMessage()">
+        ➤
+      </button>
+    </div>
+
+  </div>
+
+  <script src="js/chat.js"></script>
+</body>
+</html>

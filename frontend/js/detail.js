@@ -97,5 +97,11 @@ function contactOwner() {
   alert('Owner contact details coming soon!');
 }
 
+function openChat() {
+  const id = getHostelId();
+  const title = document.getElementById('detailTitle').textContent;
+  window.location.href = `chat.html?hostel_id=${id}&hostel_name=${encodeURIComponent(title)}`;
+}
+
 // ── INIT ──
 fetchHostelDetail();
