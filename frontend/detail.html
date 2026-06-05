@@ -148,6 +148,33 @@
     <p>© 2026 HostelFinder · Built for students, by students</p>
   </footer>
 
+  <!-- BOOKING MODAL -->
+  <div id="bookingModal" class="modal-overlay" style="display:none;">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2>Request to Book</h2>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-subtitle">You are requesting a booking for:</p>
+        <div class="modal-hostel-name" id="modalHostelName"></div>
+        <div class="modal-price" id="modalPrice"></div>
+        <div class="form-group">
+          <label>Preferred Move-in Date</label>
+          <input type="date" id="bookingDate" min=""/>
+        </div>
+        <div id="modalError" class="modal-error" style="display:none;"></div>
+        <div id="modalSuccess" class="modal-success" style="display:none;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel-modal" onclick="closeModal()">Cancel</button>
+        <button class="btn-confirm-booking" onclick="submitBooking()">
+          Confirm Request
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script src="js/detail.js"></script>
 
 </body>
