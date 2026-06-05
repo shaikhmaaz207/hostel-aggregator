@@ -1,17 +1,18 @@
 const API_BASE = 'http://127.0.0.1:8000/api';
-const emojis = ['🏢', '🏠', '🏨', '🏡', '🏘', '🏰'];
+const emojis   = ['🏢', '🏠', '🏨', '🏡', '🏘', '🏰'];
 
-// ── ROUTE PROTECTOR ──
+// ────────────────────────────────────────
+// ROUTE PROTECTOR
+// ────────────────────────────────────────
 function checkAuth() {
   const token = localStorage.getItem('access_token');
-  const role = localStorage.getItem('role');
-  const name = localStorage.getItem('user_name');
+  const role  = localStorage.getItem('role');
+  const name  = localStorage.getItem('user_name');
 
   if (!token) {
     document.getElementById('notLoggedIn').style.display = 'block';
     return false;
   }
-
   if (role !== 'Owner') {
     document.getElementById('accessDenied').style.display = 'block';
     return false;
@@ -22,17 +23,34 @@ function checkAuth() {
   return true;
 }
 
-// ── FETCH OWNER'S HOSTELS ──
+// ────────────────────────────────────────
+// TAB SWITCHER
+// ────────────────────────────────────────
+function switchTab(tab) {
+  // Toggle panels
+  document.getElementById('panel-listings').style.display =
+    tab === 'listings' ? 'block' : 'none';
+  document.getElementById('panel-requests').style.display =
+    tab === 'requests' ? 'block' : 'none';
+
+  // Toggle tab button active state
+  document.getElementById('tab-listings').classList.toggle('active', tab === 'listings');
+  document.getElementById('tab-requests').classList.toggle('active', tab === 'requests');
+
+  // Load requests when tab is opened
+  if (tab === 'requests') fetchBookingRequests();
+}
+
+// ────────────────────────────────────────
+// FETCH OWNER'S HOSTELS
+// ────────────────────────────────────────
 async function fetchOwnerHostels() {
   const token = localStorage.getItem('access_token');
 
   try {
     const response = await fetch(`${API_BASE}/hostels/`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
+      headers: { 'Authorization': `Bearer ${token}` }
     });
-
     const allHostels = await response.json();
 
     document.getElementById('loadingState').style.display = 'none';
@@ -43,8 +61,8 @@ async function fetchOwnerHostels() {
     }
 
     const totalRevenue = allHostels.reduce((sum, h) => sum + Number(h.rent_amount), 0);
-    document.getElementById('totalListings').textContent = allHostels.length;
-    document.getElementById('totalRevenue').textContent = `₹${totalRevenue.toLocaleString()}`;
+    document.getElementById('totalListings').textContent  = allHostels.length;
+    document.getElementById('totalRevenue').textContent   = `₹${totalRevenue.toLocaleString()}`;
     document.getElementById('dashboardSubtitle').textContent =
       `You have ${allHostels.length} active listing${allHostels.length > 1 ? 's' : ''}`;
 
@@ -56,7 +74,140 @@ async function fetchOwnerHostels() {
   }
 }
 
-// ── RENDER OWNER HOSTEL CARDS ──
+// ────────────────────────────────────────
+// FETCH BOOKING REQUESTS
+// ────────────────────────────────────────
+async function fetchBookingRequests() {
+  const token = localStorage.getItem('access_token');
+
+  document.getElementById('requestsLoading').style.display = 'block';
+  document.getElementById('requestsTable').innerHTML       = '';
+  document.getElementById('noRequests').style.display      = 'none';
+
+  try {
+    const response = await fetch(`${API_BASE}/bookings/requests/`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const requests = await response.json();
+
+    document.getElementById('requestsLoading').style.display = 'none';
+
+    // Update pending count in stats and badge
+    const pending = requests.filter(r => r.status === 'pending').length;
+    document.getElementById('totalRequests').textContent = pending;
+
+    if (pending > 0) {
+      document.getElementById('requestsBadge').style.display = 'inline-block';
+      document.getElementById('requestsBadge').textContent   = pending;
+    }
+
+    if (requests.length === 0) {
+      document.getElementById('noRequests').style.display = 'block';
+      return;
+    }
+
+    renderRequestsTable(requests);
+
+  } catch (error) {
+    document.getElementById('requestsLoading').textContent =
+      '❌ Failed to load requests. Make sure backend is running.';
+  }
+}
+
+// ────────────────────────────────────────
+// RENDER REQUESTS TABLE
+// ────────────────────────────────────────
+function renderRequestsTable(requests) {
+  const container = document.getElementById('requestsTable');
+
+  let html = `
+    <div class="requests-table">
+      <div class="requests-table-header">
+        <span>Student</span>
+        <span>Hostel</span>
+        <span>Request Date</span>
+        <span>Status</span>
+        <span>Actions</span>
+      </div>
+  `;
+
+  requests.forEach(req => {
+    const date   = new Date(req.created_at).toLocaleDateString('en-IN', {
+      day: 'numeric', month: 'short', year: 'numeric'
+    });
+    const isPending  = req.status === 'pending';
+    const isAccepted = req.status === 'accepted';
+    const isDeclined = req.status === 'declined';
+
+    const statusBadge = isAccepted
+      ? '<span class="status-badge accepted">✅ Accepted</span>'
+      : isDeclined
+      ? '<span class="status-badge declined">❌ Declined</span>'
+      : '<span class="status-badge pending">⏳ Pending</span>';
+
+    const actionBtns = isPending ? `
+      <button class="btn-accept" onclick="updateRequestStatus(${req.id}, 'accepted')">
+        Accept Request
+      </button>
+      <button class="btn-decline" onclick="updateRequestStatus(${req.id}, 'declined')">
+        Decline Request
+      </button>
+    ` : `<span class="action-done">—</span>`;
+
+    html += `
+      <div class="request-row" id="request-row-${req.id}">
+        <span class="req-student">👤 ${req.student_name || req.student || 'Student'}</span>
+        <span class="req-hostel">🏠 ${req.hostel_title || req.hostel || 'Hostel'}</span>
+        <span class="req-date">📅 ${date}</span>
+        <span class="req-status">${statusBadge}</span>
+        <span class="req-actions">${actionBtns}</span>
+      </div>
+    `;
+  });
+
+  html += `</div>`;
+  container.innerHTML = html;
+}
+
+// ────────────────────────────────────────
+// ACCEPT / DECLINE REQUEST
+// ────────────────────────────────────────
+async function updateRequestStatus(requestId, newStatus) {
+  const token = localStorage.getItem('access_token');
+
+  // Disable buttons immediately to prevent double clicks
+  const row = document.getElementById(`request-row-${requestId}`);
+  const btns = row.querySelectorAll('button');
+  btns.forEach(b => { b.disabled = true; b.style.opacity = '0.5'; });
+
+  try {
+    const response = await fetch(`${API_BASE}/bookings/requests/${requestId}/status/`, {
+      method:  'PATCH',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type':  'application/json'
+      },
+      body: JSON.stringify({ status: newStatus })
+    });
+
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    // Refresh the panel with updated data
+    await fetchBookingRequests();
+
+  } catch (error) {
+    // Re-enable buttons if request failed
+    btns.forEach(b => { b.disabled = false; b.style.opacity = '1'; });
+    alert(`Failed to update request. Please try again.\nError: ${error.message}`);
+  }
+}
+
+// ────────────────────────────────────────
+// RENDER OWNER HOSTEL CARDS
+// ────────────────────────────────────────
 function renderOwnerHostels(hostels) {
   const grid = document.getElementById('ownerHostelGrid');
   grid.innerHTML = '';
@@ -78,20 +229,12 @@ function renderOwnerHostels(hostels) {
               ₹${Number(hostel.rent_amount).toLocaleString()}
               <span>/month</span>
             </div>
-            <button class="btn-view" onclick="viewHostel(${hostel.id})">
-              View
-            </button>
+            <button class="btn-view" onclick="viewHostel(${hostel.id})">View</button>
           </div>
           <div class="owner-card-actions">
-            <button class="btn-edit" onclick="editHostel(${hostel.id})">
-              ✏️ Edit
-            </button>
-            <button class="btn-upload" onclick="uploadImages(${hostel.id})">
-              🖼️ Images
-            </button>
-            <button class="btn-delete" onclick="deleteHostel(${hostel.id})">
-              🗑️ Delete
-            </button>
+            <button class="btn-edit" onclick="editHostel(${hostel.id})">✏️ Edit</button>
+            <button class="btn-upload" onclick="uploadImages(${hostel.id})">🖼️ Images</button>
+            <button class="btn-delete" onclick="deleteHostel(${hostel.id})">🗑️ Delete</button>
           </div>
         </div>
       </div>
@@ -99,29 +242,18 @@ function renderOwnerHostels(hostels) {
   });
 }
 
-// ── VIEW HOSTEL ──
-function viewHostel(id) {
-  window.location.href = `detail.html?id=${id}`;
-}
-
-// ── EDIT HOSTEL ──
-function editHostel(id) {
-  alert(`Edit hostel ID ${id} — coming in next sprint!`);
-}
-
-// ── UPLOAD IMAGES ──
-function uploadImages(id) {
-  window.location.href = `upload.html?hostel_id=${id}`;
-}
-
-// ── DELETE HOSTEL ──
-function deleteHostel(id) {
+// ────────────────────────────────────────
+// HELPER FUNCTIONS
+// ────────────────────────────────────────
+function viewHostel(id)    { window.location.href = `detail.html?id=${id}`; }
+function editHostel(id)    { alert(`Edit hostel ID ${id} — coming soon!`); }
+function uploadImages(id)  { window.location.href = `upload.html?hostel_id=${id}`; }
+function deleteHostel(id)  {
   if (confirm(`Are you sure you want to delete hostel ID ${id}?`)) {
-    alert(`Delete functionality coming in next sprint!`);
+    alert('Delete functionality coming in next sprint!');
   }
 }
 
-// ── LOGOUT ──
 function logout() {
   localStorage.removeItem('access_token');
   localStorage.removeItem('refresh_token');
@@ -130,8 +262,12 @@ function logout() {
   window.location.href = 'index.html';
 }
 
-// ── INIT ──
+// ────────────────────────────────────────
+// INIT
+// ────────────────────────────────────────
 const allowed = checkAuth();
 if (allowed) {
   fetchOwnerHostels();
+  // Pre-fetch requests count for badge
+  fetchBookingRequests();
 }
