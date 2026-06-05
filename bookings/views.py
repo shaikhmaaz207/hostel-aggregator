@@ -6,6 +6,7 @@ from users.permissions import IsStudent, IsOwner
 from rest_framework.permissions import IsAuthenticated
 from .models import Booking
 from .serializers import BookingSerializer, BookingStatusSerializer
+from chat.notifications import send_notification
 
 
 class CreateBookingView(APIView):
@@ -29,7 +30,23 @@ class CreateBookingView(APIView):
 
         serializer = BookingSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(student=request.user)
+            booking = serializer.save(student=request.user)
+
+            # ── NOTIFY OWNER in real-time ──
+            owner_id = booking.hostel.owner.id
+            send_notification(
+                user_id    = owner_id,
+                event_type = 'new_booking',
+                message    = f"New booking request from {request.user.name} for {booking.hostel.title}!",
+                extra_data = {
+                    'booking_id':   booking.id,
+                    'student_name': request.user.name,
+                    'hostel_title': booking.hostel.title,
+                    'booking_date': str(booking.booking_date),
+                    'status':       booking.status,
+                }
+            )
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -60,15 +77,46 @@ class UpdateBookingStatusView(APIView):
                 status=status.HTTP_403_FORBIDDEN
             )
 
+        old_status = booking.status
+
         serializer = BookingStatusSerializer(
             booking,
             data=request.data,
             partial=True
         )
         if serializer.is_valid():
-            serializer.save()
+            updated_booking = serializer.save()
+            new_status = updated_booking.status
+
+            # ── NOTIFY STUDENT in real-time ──
+            if new_status == 'Approved':
+                send_notification(
+                    user_id    = booking.student.id,
+                    event_type = 'booking_approved',
+                    message    = f"🎉 Your booking for {booking.hostel.title} has been APPROVED!",
+                    extra_data = {
+                        'booking_id':   booking.id,
+                        'hostel_title': booking.hostel.title,
+                        'booking_date': str(booking.booking_date),
+                        'status':       new_status,
+                    }
+                )
+            elif new_status == 'Rejected':
+                send_notification(
+                    user_id    = booking.student.id,
+                    event_type = 'booking_rejected',
+                    message    = f"❌ Your booking for {booking.hostel.title} has been REJECTED.",
+                    extra_data = {
+                        'booking_id':   booking.id,
+                        'hostel_title': booking.hostel.title,
+                        'booking_date': str(booking.booking_date),
+                        'status':       new_status,
+                    }
+                )
+
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class GetBookingsView(APIView):
     authentication_classes = [CustomJWTAuthentication]
