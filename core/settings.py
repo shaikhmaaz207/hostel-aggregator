@@ -37,12 +37,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'corsheaders',  
-    'rest_framework',  
+    'corsheaders',
+    'rest_framework',
     'users',
     'hostels',
+    'bookings',    # ← add this
 ]
-
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',  
     'django.middleware.security.SecurityMiddleware',
@@ -141,3 +141,9 @@ SIMPLE_JWT = {
     'JTI_CLAIM': 'jti',
 }
 CORS_ALLOW_ALL_ORIGINS = True
+
+import os
+
+# Media files (uploaded images)
+MEDIA_URL  = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
