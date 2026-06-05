@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'users',
     'hostels',
-    'bookings',    # ← add this
+    'bookings',
+    'chat',    # ← add this
 ]
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',  
