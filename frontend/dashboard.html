@@ -19,7 +19,7 @@
     </div>
   </nav>
 
-  <!-- ACCESS DENIED (shown to students) -->
+  <!-- ACCESS DENIED -->
   <div id="accessDenied" style="display:none;">
     <div class="access-denied-box">
       <div class="denied-icon">🚫</div>
@@ -40,41 +40,7 @@
     </div>
   </div>
 
-  <!-- DASHBOARD CONTENT (shown to owners only) -->
-  <div id="dashboardContent" style="display:none;">
-
-    <!-- DASHBOARD HEADER -->
-    <div class="dashboard-header">
-      <div class="container">
-        <div class="dashboard-header-left">
-          <h1>My Properties</h1>
-          <p id="dashboardSubtitle">Managing your hostel listings</p>
-        </div>
-        <div class="dashboard-header-right">
-          <a href="add-hostel.html" class="btn-add-hostel">+ Add New Hostel</a>
-        </div>
-      </div>
-    </div>
-
-    <!-- STATS ROW -->
-    <div class="container">
-      <div class="stats-row">
-        <div class="stat-card">
-          <div class="stat-number" id="totalListings">0</div>
-          <div class="stat-label">Total Listings</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" id="totalRevenue">₹0</div>
-          <div class="stat-label">Monthly Revenue</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number">⭐ N/A</div>
-          <div class="stat-label">Avg. Rating</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- DASHBOARD CONTENT (shown to owners only) -->
+  <!-- DASHBOARD CONTENT -->
   <div id="dashboardContent" style="display:none;">
 
     <!-- DASHBOARD HEADER -->
@@ -147,19 +113,6 @@
         <div class="no-hostels-icon">📭</div>
         <h3>No incoming requests yet!</h3>
         <p>When students request to stay at your hostel, they will appear here.</p>
-      </div>
-    </div>
-
-  </div>
-      <div id="loadingState" class="dash-loading">
-        Loading your properties...
-      </div>
-      <div class="hostel-grid" id="ownerHostelGrid"></div>
-      <div id="noHostels" style="display:none;" class="no-hostels-box">
-        <div class="no-hostels-icon">🏠</div>
-        <h3>No listings yet!</h3>
-        <p>You haven't added any hostels yet. Add your first property now.</p>
-        <a href="add-hostel.html" class="btn-add-hostel">+ Add Your First Hostel</a>
       </div>
     </div>
 
