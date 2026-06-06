@@ -1,16 +1,17 @@
 # hostels/views.py
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, generics, permissions
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from users.permissions import IsOwner
 from users.authentication import CustomJWTAuthentication
-from .models import Hostel
-from .serializers import HostelSerializer
-from .validators import validate_search_params
+from .models import Hostel, HostelImage
+from .serializers import HostelSerializer, HostelImageSerializer
+from .validators import validate_search_params, haversine_distance
 from PIL import Image
 from django.core.files.base import ContentFile
 import io
+
 
 class HostelListView(APIView):
     permission_classes = [AllowAny]
@@ -25,7 +26,7 @@ class HostelListView(APIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
-        cleaned = result.get('cleaned', {})
+        cleaned  = result.get('cleaned', {})
         queryset = Hostel.objects.all()
 
         if 'max_price' in cleaned:
@@ -44,13 +45,35 @@ class HostelListView(APIView):
         else:
             queryset = queryset.order_by('-created_at')
 
+        # ── GEOSPATIAL FILTER ──
+        if 'lat' in cleaned and 'lng' in cleaned and 'radius' in cleaned:
+            center_lat = cleaned['lat']
+            center_lng = cleaned['lng']
+            radius_km  = cleaned['radius']
+
+            filtered = []
+            for hostel in queryset:
+                if hostel.latitude and hostel.longitude:
+                    distance = haversine_distance(
+                        center_lat, center_lng,
+                        float(hostel.latitude),
+                        float(hostel.longitude)
+                    )
+                    if distance <= radius_km:
+                        hostel.distance_km = round(distance, 2)
+                        filtered.append(hostel)
+
+            filtered.sort(key=lambda h: h.distance_km)
+            serializer = HostelSerializer(filtered, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
         serializer = HostelSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class CreateHostelView(APIView):
     authentication_classes = [CustomJWTAuthentication]
-    permission_classes = [IsAuthenticated, IsOwner]
+    permission_classes     = [IsAuthenticated, IsOwner]
 
     def post(self, request):
         serializer = HostelSerializer(data=request.data)
@@ -65,7 +88,7 @@ class CreateHostelView(APIView):
 
 class UploadHostelImageView(APIView):
     authentication_classes = [CustomJWTAuthentication]
-    permission_classes = [IsAuthenticated, IsOwner]
+    permission_classes     = [IsAuthenticated, IsOwner]
 
     def post(self, request, hostel_id):
         try:
@@ -83,7 +106,7 @@ class UploadHostelImageView(APIView):
             )
 
         image_file = request.FILES['image']
-        img = Image.open(image_file)
+        img        = Image.open(image_file)
 
         if img.mode in ('RGBA', 'P'):
             img = img.convert('RGB')
@@ -102,10 +125,7 @@ class UploadHostelImageView(APIView):
             "message": "Image uploaded successfully",
             "image_url": request.build_absolute_uri(hostel.image.url)
         }, status=status.HTTP_200_OK)
-from rest_framework import generics, permissions, status
-from rest_framework.response import Response
-from .models import HostelImage
-from .serializers import HostelImageSerializer
+
 
 class HostelImageListCreateView(generics.ListCreateAPIView):
     serializer_class   = HostelImageSerializer
