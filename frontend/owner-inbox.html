@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Owner Inbox — HostelFinder</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="css/chat.css"/>
+  <link rel="stylesheet" href="css/inbox.css"/>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="nav-brand">🏠 HostelFinder</div>
+    <div class="nav-links">
+      <a href="dashboard.html">← Dashboard</a>
+      <span class="nav-owner-name" id="ownerName"></span>
+    </div>
+  </nav>
+
+  <!-- INBOX WRAPPER -->
+  <div class="inbox-wrapper">
+
+    <!-- LEFT SIDEBAR: CONTACT LIST -->
+    <aside class="inbox-sidebar">
+
+      <div class="sidebar-top">
+        <h2>💬 Inbox</h2>
+        <span class="inbox-count" id="inboxCount">0 chats</span>
+      </div>
+
+      <!-- Search contacts -->
+      <div class="sidebar-search">
+        <input
+          type="text"
+          id="contactSearch"
+          placeholder="Search students..."
+          oninput="filterContacts(this.value)"
+        />
+      </div>
+
+      <!-- Contact list -->
+      <div class="contact-list" id="contactList">
+        <div class="contacts-loading" id="contactsLoading">
+          Loading conversations...
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- RIGHT PANE: ACTIVE CONVERSATION -->
+    <main class="inbox-chat-pane">
+
+      <!-- Empty state (no conversation selected) -->
+      <div class="no-conversation" id="noConversation">
+        <div class="no-conv-icon">💬</div>
+        <h3>Select a conversation</h3>
+        <p>Choose a student from the left to start chatting</p>
+      </div>
+
+      <!-- Active chat (hidden until contact selected) -->
+      <div class="active-chat" id="activeChat" style="display:none;">
+
+        <!-- Chat Header -->
+        <div class="chat-header">
+          <div class="chat-avatar" id="activeChatAvatar">👤</div>
+          <div class="chat-header-info">
+            <div class="chat-hostel-name" id="activeChatName">Student</div>
+            <div class="chat-status">
+              <span class="status-dot" id="activeStatusDot"></span>
+              <span id="activeStatusText">Connecting...</span>
+            </div>
+          </div>
+          <div class="chat-header-meta" id="activeChatHostel"></div>
+        </div>
+
+        <!-- Message History Pane -->
+        <div class="chat-messages" id="chatMessages">
+          <div class="system-message" id="chatSystemMsg">
+            Select a conversation to view messages.
+          </div>
+        </div>
+
+        <!-- Typing Indicator -->
+        <div class="typing-indicator" id="typingIndicator" style="display:none;">
+          <span></span><span></span><span></span>
+          Student is typing...
+        </div>
+
+        <!-- Input Bar -->
+        <div class="chat-input-bar">
+          <input
+            type="text"
+            id="messageInput"
+            placeholder="Type a reply..."
+            maxlength="500"
+            onkeydown="handleKeyDown(event)"
+          />
+          <button class="btn-send" onclick="sendMessage()">➤</button>
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script src="js/owner-inbox.js"></script>
+</body>
+</html>

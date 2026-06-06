@@ -372,3 +372,20 @@
   .req-actions { margin-top: 8px; }
   .dashboard-tabs { overflow-x: auto; }
 }
+/* ── Inbox Button ── */
+.btn-inbox {
+  padding: 12px 20px;
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: 1px solid rgba(255,255,255,0.2);
+  transition: all 0.2s;
+  margin-right: 10px;
+}
+.btn-inbox:hover {
+  background: rgba(255,255,255,0.2);
+}
+
