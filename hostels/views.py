@@ -8,6 +8,7 @@ from users.authentication import CustomJWTAuthentication
 from .models import Hostel, HostelImage
 from .serializers import HostelSerializer, HostelImageSerializer
 from .validators import validate_search_params, haversine_distance
+from .geocoding import geocode_address
 from PIL import Image
 from django.core.files.base import ContentFile
 import io
@@ -76,7 +77,24 @@ class CreateHostelView(APIView):
     permission_classes     = [IsAuthenticated, IsOwner]
 
     def post(self, request):
-        serializer = HostelSerializer(data=request.data)
+        data = request.data.copy()
+
+        # ── AUTO GEOCODE if lat/lng not provided ──
+        if not data.get('latitude') or not data.get('longitude'):
+            address = data.get('address')
+            if address:
+                geo_result = geocode_address(address)
+
+                if 'error' in geo_result:
+                    return Response(
+                        {"error": f"Geocoding failed: {geo_result['error']}"},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+                data['latitude']  = geo_result['lat']
+                data['longitude'] = geo_result['lng']
+
+        serializer = HostelSerializer(data=data)
         if serializer.is_valid():
             serializer.save(owner=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
