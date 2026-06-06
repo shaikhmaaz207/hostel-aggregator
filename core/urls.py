@@ -11,6 +11,7 @@ urlpatterns = [
     path('api/hostels/',  include('hostels.urls')),
     path('api/bookings/', include('bookings.urls')),
     path('api/messages/', include('chat.urls')),
+    path('api/hostels/',  include('reviews.urls')),   # HA-29 Reviews
     re_path(r'^frontend/(?P<path>.*)$', serve, {
         'document_root': os.path.join(settings.BASE_DIR, 'frontend'),
     }),
