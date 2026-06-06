@@ -14,10 +14,14 @@ class User(models.Model):
                           choices=UserRole.choices,
                           default=UserRole.STUDENT
                       )
-    # New fields for HA-8
+    # HA-8 fields
     phone_number    = models.CharField(max_length=15, blank=True, null=True)
     profile_picture = models.ImageField(upload_to='profiles/', blank=True, null=True)
     college_name    = models.CharField(max_length=200, blank=True, null=True)
+
+    # HA-28 — Verification flag (Admin only)
+    is_verified     = models.BooleanField(default=False)
+
     created_at      = models.DateTimeField(auto_now_add=True)
 
     @property
