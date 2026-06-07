@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hostel Map — HostelFinder</title>
+  <link rel="stylesheet" href="css/style.css"/>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+  <!-- MarkerCluster CSS -->
+  <link rel="stylesheet"
+    href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css"/>
+  <link rel="stylesheet"
+    href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css"/>
+
+  <link rel="stylesheet" href="css/map.css"/>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="nav-brand">🏠 HostelFinder</div>
+    <div class="nav-links">
+      <a href="index.html">← Browse List</a>
+      <a href="login.html">Login</a>
+      <a href="#" class="btn-register">Register</a>
+    </div>
+  </nav>
+
+  <!-- MAP CONTROLS -->
+  <div class="map-controls">
+    <div class="map-controls-left">
+      <h2 class="map-title">🗺️ Hostel Map</h2>
+      <span class="map-subtitle" id="mapSubtitle">Loading hostels...</span>
+    </div>
+    <div class="map-controls-right">
+      <input type="text" id="mapSearch"
+        placeholder="Search hostels..."
+        oninput="filterMapHostels()"/>
+      <select id="priceFilter" onchange="filterMapHostels()">
+        <option value="all">All Prices</option>
+        <option value="3000">Under ₹3,000</option>
+        <option value="5000">Under ₹5,000</option>
+        <option value="7000">Under ₹7,000</option>
+      </select>
+      <button class="btn-reset-map" onclick="resetMap()">Reset View</button>
+    </div>
+  </div>
+
+  <!-- MAP CONTAINER -->
+  <div id="map"></div>
+
+  <!-- HOSTEL DETAIL SIDEBAR -->
+  <div class="map-sidebar" id="mapSidebar" style="display:none;">
+    <button class="sidebar-close" onclick="closeSidebar()">✕</button>
+    <div class="sidebar-emoji" id="sidebarEmoji"></div>
+    <h3 id="sidebarTitle"></h3>
+    <div class="sidebar-location" id="sidebarLocation"></div>
+    <div class="sidebar-price" id="sidebarPrice"></div>
+    <p id="sidebarDesc"></p>
+    <a id="sidebarDetailBtn" href="#" class="btn-sidebar-detail">
+      View Full Details →
+    </a>
+    <a id="sidebarMapsBtn" href="#" target="_blank" class="btn-sidebar-maps">
+      📍 Open in Google Maps
+    </a>
+  </div>
+
+  <!-- CLUSTER STATS -->
+  <div class="cluster-stats" id="clusterStats" style="display:none;">
+    <span id="clusterInfo"></span>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- MarkerCluster JS -->
+  <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+
+  <script src="js/map.js"></script>
+
+</body>
+</html>
