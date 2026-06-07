@@ -12,11 +12,11 @@ function initMap() {
   map = L.map('map').setView([19.8762, 75.3433], 13);
 
   // OpenStreetMap tiles (FREE - no API key needed)
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors',
-    maxZoom: 19
-  }).addTo(map);
-
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    subdomains: 'abcd',
+    maxZoom: 20
+}).addTo(map);
   // ── MARKER CLUSTER GROUP ──
   markerCluster = L.markerClusterGroup({
     // Cluster radius in pixels
