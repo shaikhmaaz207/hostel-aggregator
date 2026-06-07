@@ -99,12 +99,17 @@ function populatePage(hostel) {
 // ────────────────────────────────────────
 async function fetchReviews(hostelId) {
   try {
-    const response = await fetch(`${API_BASE}/reviews/?hostel=${hostelId}`);
+    const response = await fetch(`${API_BASE}/hostels/${hostelId}/reviews/`, {
+      headers: {
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+      }
+  });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-    const reviews = await response.json();
+    const data = await response.json();
+    const reviews = data.reviews || data;
     reviewsLocalList = reviews;
-
+    
     document.getElementById('reviewsLoading').style.display = 'none';
     renderReviews(reviews);
     renderAverageRating(reviews);
@@ -274,18 +279,16 @@ async function submitReview() {
   btn.textContent  = 'Submitting...';
 
   try {
-    const response = await fetch(`${API_BASE}/reviews/`, {
+    const response = await fetch(`${API_BASE}/hostels/${currentHostelId}/reviews/`, {
       method:  'POST',
       headers: {
         'Content-Type':  'application/json',
         'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify({
-        hostel:      currentHostelId,
-        rating:      selectedRating,
-        comment:     comment,
-        review_text: comment
-      })
+        rating:  selectedRating,
+        comment: comment
+    })
     });
 
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
