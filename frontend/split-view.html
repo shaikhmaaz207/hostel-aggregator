@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Map + List — HostelFinder</title>
+  <link rel="stylesheet" href="css/style.css"/>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link rel="stylesheet"
+    href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css"/>
+  <link rel="stylesheet"
+    href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css"/>
+
+  <link rel="stylesheet" href="css/map.css"/>
+  <link rel="stylesheet" href="css/split-view.css"/>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="nav-brand">🏠 HostelFinder</div>
+    <div class="nav-links">
+      <a href="index.html">← List View</a>
+      <a href="map.html">🗺️ Full Map</a>
+      <a href="login.html">Login</a>
+      <a href="#" class="btn-register">Register</a>
+    </div>
+  </nav>
+
+  <!-- TOP CONTROLS BAR -->
+  <div class="split-controls">
+    <div class="split-controls-left">
+      <span class="split-title">🗺️ Map + List View</span>
+      <span class="split-subtitle" id="splitSubtitle">Loading hostels...</span>
+    </div>
+    <div class="split-controls-right">
+      <input
+        type="text"
+        id="splitSearch"
+        placeholder="Search hostels..."
+        oninput="onSplitSearch()"
+      />
+      <select id="splitPrice" onchange="onSplitFilter()">
+        <option value="all">All Prices</option>
+        <option value="3000">Under ₹3,000</option>
+        <option value="5000">Under ₹5,000</option>
+        <option value="7000">Under ₹7,000</option>
+      </select>
+      <button class="btn-reset-map" onclick="resetSplitView()">Reset</button>
+    </div>
+  </div>
+
+  <!-- SPLIT SCREEN BODY -->
+  <div class="split-body">
+
+    <!-- LEFT: HOSTEL CARD LIST -->
+    <div class="split-list" id="splitList">
+
+      <div class="split-list-header">
+        <span id="splitCount">0 hostels</span>
+        <div class="split-loading" id="splitLoading">
+          <div class="spinner"></div> Loading...
+        </div>
+      </div>
+
+      <!-- Skeleton loaders -->
+      <div id="splitSkeleton">
+        <div class="split-skeleton-card"><div class="sk-img"></div><div class="sk-line w70"></div><div class="sk-line w50"></div><div class="sk-line w40"></div></div>
+        <div class="split-skeleton-card"><div class="sk-img"></div><div class="sk-line w70"></div><div class="sk-line w50"></div><div class="sk-line w40"></div></div>
+        <div class="split-skeleton-card"><div class="sk-img"></div><div class="sk-line w70"></div><div class="sk-line w50"></div><div class="sk-line w40"></div></div>
+      </div>
+
+      <!-- Real hostel cards -->
+      <div id="splitCards"></div>
+
+      <!-- No results -->
+      <div id="splitNoResults" style="display:none;" class="split-no-results">
+        <p>No hostels found. Try adjusting filters.</p>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: MAP -->
+    <div class="split-map-container">
+      <div id="splitMap"></div>
+
+      <!-- Drag/Zoom refresh button -->
+      <button class="btn-refresh-area" id="refreshAreaBtn"
+        style="display:none;"
+        onclick="refreshFromMapBounds()">
+        🔄 Search this area
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+  <script src="js/split-view.js"></script>
+
+</body>
+</html>
