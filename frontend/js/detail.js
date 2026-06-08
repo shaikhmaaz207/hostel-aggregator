@@ -182,9 +182,62 @@ function renderReviews(reviews) {
   noReviews.style.display = 'none';
   countEl.textContent     = `(${reviews.length})`;
 
+  const token     = localStorage.getItem('access_token');
+  const role      = localStorage.getItem('role');
+  const isOwner   = token && role === 'Owner';
+
   reviews.forEach(review => {
     const item = document.createElement('div');
     item.className = 'review-item';
+    item.id        = `review-${review.id}`;
+
+    // Owner reply block — show existing reply or reply form for owner
+    const existingReply = review.owner_reply || review.reply || null;
+
+    const replyHTML = existingReply
+      ? `<div class="owner-reply">
+           <div class="owner-reply-tag">🏠 Owner Response</div>
+           <div class="owner-reply-text">${escapeHTML(existingReply)}</div>
+         </div>`
+      : isOwner
+      ? `<div class="reply-form" id="reply-form-${review.id}">
+           <textarea
+             id="reply-input-${review.id}"
+             class="reply-textarea"
+             placeholder="Write a response to this review..."
+             maxlength="400"
+             rows="2"
+           ></textarea>
+           <div class="reply-form-actions">
+             <span class="reply-char-count">
+               <span id="reply-char-${review.id}">0</span>/400
+             </span>
+             <div class="reply-btns">
+               <button class="btn-reply-cancel"
+                 onclick="cancelReply(${review.id})">
+                 Cancel
+               </button>
+               <button class="btn-reply-submit"
+                 id="reply-btn-${review.id}"
+                 onclick="submitReply(${review.id})">
+                 Post Response
+               </button>
+             </div>
+           </div>
+           <div class="reply-error" id="reply-error-${review.id}"
+             style="display:none;"></div>
+         </div>`
+      : '';
+
+    // Reply toggle button — only for owner when no reply exists
+    const replyToggleBtn = isOwner && !existingReply
+      ? `<button class="btn-reply-toggle"
+           id="reply-toggle-${review.id}"
+           onclick="toggleReplyForm(${review.id})">
+           ✏️ Reply
+         </button>`
+      : '';
+
     item.innerHTML = `
       <div class="review-header">
         <div class="review-avatar">
@@ -196,13 +249,119 @@ function renderReviews(reviews) {
           </div>
           <div class="review-date">${formatDate(review.created_at)}</div>
         </div>
-        <div class="review-stars">
-          ${renderStars(review.rating)}
+        <div class="review-header-right">
+          <div class="review-stars">
+            ${renderStars(review.rating)}
+          </div>
+          ${replyToggleBtn}
         </div>
       </div>
-      <div class="review-comment">${escapeHTML(review.comment || review.review_text || '')}</div>
+      <div class="review-comment">
+        ${escapeHTML(review.comment || review.review_text || '')}
+      </div>
+      ${replyHTML}
     `;
+
     container.appendChild(item);
+
+    // Attach char counter for reply textarea if owner
+    if (isOwner && !existingReply) {
+      const textarea = document.getElementById(`reply-input-${review.id}`);
+      const charEl   = document.getElementById(`reply-char-${review.id}`);
+      if (textarea && charEl) {
+        textarea.addEventListener('input', () => {
+          charEl.textContent = textarea.value.length;
+        });
+      }
+    }
+  });
+}
+
+  
+
+    // Owner reply block — show existing reply or reply form for owner
+    const existingReply = review.owner_reply || review.reply || null;
+
+    const replyHTML = existingReply
+      ? `<div class="owner-reply">
+           <div class="owner-reply-tag">🏠 Owner Response</div>
+           <div class="owner-reply-text">${escapeHTML(existingReply)}</div>
+         </div>`
+      : isOwner
+      ? `<div class="reply-form" id="reply-form-${review.id}">
+           <textarea
+             id="reply-input-${review.id}"
+             class="reply-textarea"
+             placeholder="Write a response to this review..."
+             maxlength="400"
+             rows="2"
+           ></textarea>
+           <div class="reply-form-actions">
+             <span class="reply-char-count">
+               <span id="reply-char-${review.id}">0</span>/400
+             </span>
+             <div class="reply-btns">
+               <button class="btn-reply-cancel"
+                 onclick="cancelReply(${review.id})">
+                 Cancel
+               </button>
+               <button class="btn-reply-submit"
+                 id="reply-btn-${review.id}"
+                 onclick="submitReply(${review.id})">
+                 Post Response
+               </button>
+             </div>
+           </div>
+           <div class="reply-error" id="reply-error-${review.id}"
+             style="display:none;"></div>
+         </div>`
+      : '';
+
+    // Reply toggle button — only for owner when no reply exists
+    const replyToggleBtn = isOwner && !existingReply
+      ? `<button class="btn-reply-toggle"
+           id="reply-toggle-${review.id}"
+           onclick="toggleReplyForm(${review.id})">
+           ✏️ Reply
+         </button>`
+      : '';
+
+    item.innerHTML = `
+      <div class="review-header">
+        <div class="review-avatar">
+          ${getInitials(review.student_name || review.user || 'Student')}
+        </div>
+        <div class="review-meta">
+          <div class="review-author">
+            ${review.student_name || review.user || 'Anonymous Student'}
+          </div>
+          <div class="review-date">${formatDate(review.created_at)}</div>
+        </div>
+        <div class="review-header-right">
+          <div class="review-stars">
+            ${renderStars(review.rating)}
+          </div>
+          ${replyToggleBtn}
+        </div>
+      </div>
+      <div class="review-comment">
+        ${escapeHTML(review.comment || review.review_text || '')}
+      </div>
+      ${replyHTML}
+    `;
+
+    container.appendChild(item);
+
+    // Attach char counter for reply textarea if owner
+    if (isOwner && !existingReply) {
+      const textarea = document.getElementById(`reply-input-${review.id}`);
+      const charEl   = document.getElementById(`reply-char-${review.id}`);
+      if (textarea && charEl) {
+        textarea.addEventListener('input', () => {
+          charEl.textContent = textarea.value.length;
+        });
+      }
+    }
   });
 }
 
@@ -366,6 +525,103 @@ function openChat() {
   window.location.href =
     `chat.html?hostel_id=${id}&hostel_name=${encodeURIComponent(title)}`;
 }
+// ────────────────────────────────────────
+// TOGGLE REPLY FORM
+// ────────────────────────────────────────
+function toggleReplyForm(reviewId) {
+  const form   = document.getElementById(`reply-form-${reviewId}`);
+  const toggle = document.getElementById(`reply-toggle-${reviewId}`);
 
+  if (!form) return;
+
+  const isVisible = form.style.display !== 'none' && form.style.display !== '';
+
+  if (isVisible) {
+    form.style.display   = 'none';
+    toggle.textContent   = '✏️ Reply';
+  } else {
+    form.style.display   = 'block';
+    toggle.textContent   = '✕ Cancel';
+    document.getElementById(`reply-input-${reviewId}`).focus();
+  }
+}
+
+function cancelReply(reviewId) {
+  const form   = document.getElementById(`reply-form-${reviewId}`);
+  const toggle = document.getElementById(`reply-toggle-${reviewId}`);
+  const input  = document.getElementById(`reply-input-${reviewId}`);
+  const charEl = document.getElementById(`reply-char-${reviewId}`);
+
+  if (form)   form.style.display = 'none';
+  if (toggle) toggle.textContent = '✏️ Reply';
+  if (input)  input.value        = '';
+  if (charEl) charEl.textContent = '0';
+}
+
+// ────────────────────────────────────────
+// SUBMIT OWNER REPLY
+// ────────────────────────────────────────
+async function submitReply(reviewId) {
+  const input   = document.getElementById(`reply-input-${reviewId}`);
+  const btn     = document.getElementById(`reply-btn-${reviewId}`);
+  const errorEl = document.getElementById(`reply-error-${reviewId}`);
+  const replyText = input.value.trim();
+
+  errorEl.style.display = 'none';
+
+  // Validate
+  if (replyText.length < 5) {
+    errorEl.textContent   = 'Reply must be at least 5 characters.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  const token = localStorage.getItem('access_token');
+
+  btn.disabled    = true;
+  btn.textContent = 'Posting...';
+
+  try {
+    const response = await fetch(
+      `${API_BASE}/hostels/${currentHostelId}/reviews/${reviewId}/reply/`, {
+      method:  'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ reply: replyText })
+    });
+
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    // ── INSTANT UI UPDATE (DoD requirement) ──
+    // Update local state array with reply
+    const reviewIndex = reviewsLocalList.findIndex(r => r.id === reviewId);
+    if (reviewIndex !== -1) {
+      reviewsLocalList[reviewIndex].owner_reply = replyText;
+    }
+
+    // Replace the reply form with the rendered reply tag
+    const form = document.getElementById(`reply-form-${reviewId}`);
+    const toggle = document.getElementById(`reply-toggle-${reviewId}`);
+
+    const replyDiv = document.createElement('div');
+    replyDiv.className = 'owner-reply';
+    replyDiv.style.animation = 'fadeUp 0.3s ease';
+    replyDiv.innerHTML = `
+      <div class="owner-reply-tag">🏠 Owner Response</div>
+      <div class="owner-reply-text">${escapeHTML(replyText)}</div>
+    `;
+
+    if (form)   form.replaceWith(replyDiv);
+    if (toggle) toggle.remove();
+
+  } catch (error) {
+    errorEl.textContent   = 'Failed to post reply. Please try again.';
+    errorEl.style.display = 'block';
+    btn.disabled    = false;
+    btn.textContent = 'Post Response';
+  }
+}
 // ── INIT ──
 fetchHostelDetail();
