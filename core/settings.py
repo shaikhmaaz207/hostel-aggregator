@@ -11,6 +11,12 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+from pathlib import Path
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,13 +26,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-$!9%37=rajvzue)%l3k$doop*ww&8ly5e(pev*bgz9yvqtaf42'
-
+SECRET_KEY = os.getenv('SECRET_KEY', 'fallback-secret-key-for-dev-only')
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = ['*']
-
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 
 # Application definition
 
@@ -85,12 +88,12 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'hostel_aggregator_db',
-        'USER': 'hostel_developer',
-        'PASSWORD': 'your_secure_password', # Use the password you set in DBeaver
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'ENGINE':   'django.db.backends.postgresql',
+        'NAME':     os.getenv('DB_NAME',     'hostel_aggregator_db'),
+        'USER':     os.getenv('DB_USER',     'hostel_developer'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'your_secure_password'),
+        'HOST':     os.getenv('DB_HOST',     'localhost'),
+        'PORT':     os.getenv('DB_PORT',     '5432'),
     }
 }
 
@@ -196,3 +199,51 @@ CACHES = {
         'LOCATION': 'hostel-aggregator-cache',
     }
 }
+
+# HA-39: Production Logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'detailed': {
+            'format': '[%(asctime)s] %(levelname)s %(name)s: %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S'
+        },
+    },
+    'handlers': {
+        'app_file': {
+            'class':       'logging.handlers.RotatingFileHandler',
+            'filename':    BASE_DIR / 'logs' / 'app.log',
+            'maxBytes':    5 * 1024 * 1024,
+            'backupCount': 5,
+            'formatter':   'detailed',
+        },
+        'error_file': {
+            'class':       'logging.handlers.RotatingFileHandler',
+            'filename':    BASE_DIR / 'logs' / 'error.log',
+            'maxBytes':    5 * 1024 * 1024,
+            'backupCount': 5,
+            'formatter':   'detailed',
+            'level':       'ERROR',
+        },
+        'console': {
+            'class':     'logging.StreamHandler',
+            'formatter': 'detailed',
+        },
+    },
+    'root': {
+        'handlers': ['app_file', 'error_file', 'console'],
+        'level':    'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers':  ['app_file', 'error_file', 'console'],
+            'level':     'INFO',
+            'propagate': False,
+        },
+    },
+}
+
+# Create logs directory
+import os
+os.makedirs(BASE_DIR / 'logs', exist_ok=True)
