@@ -6,3 +6,19 @@
 [2026-06-08 09:53:32] INFO daphne.server: HTTP/2 support not enabled (install the http2 and tls Twisted extras)
 [2026-06-08 09:53:32] INFO daphne.server: Configuring endpoint tcp:port=8000:interface=127.0.0.1
 [2026-06-08 09:53:32] CRITICAL daphne.server: Listen failure: Couldn't listen on 127.0.0.1:8000: [WinError 10048] Only one usage of each socket address (protocol/network address/port) is normally permitted.
+[2026-06-08 09:56:11] INFO daphne.cli: Starting server at tcp:port=8000:interface=127.0.0.1
+[2026-06-08 09:56:11] INFO daphne.server: HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+[2026-06-08 09:56:11] INFO daphne.server: Configuring endpoint tcp:port=8000:interface=127.0.0.1
+[2026-06-08 09:56:11] INFO daphne.server: Listening on TCP address 127.0.0.1:8000
+[2026-06-08 09:57:58] WARNING django.request: Forbidden: /api/hostels/6/reviews/
+[2026-06-08 09:57:58] WARNING django.request: Forbidden: /api/hostels/6/reviews/
+[2026-06-08 09:58:02] WARNING django.request: Forbidden: /api/hostels/6/reviews/
+[2026-06-08 09:58:03] WARNING django.request: Forbidden: /api/hostels/6/reviews/
+[2026-06-08 09:58:04] WARNING django.request: Forbidden: /api/hostels/6/reviews/
+[2026-06-08 09:58:09] WARNING django.request: Forbidden: /api/hostels/6/reviews/
+[2026-06-08 09:58:10] WARNING django.request: Forbidden: /api/hostels/6/reviews/
+[2026-06-08 14:15:13] INFO daphne.cli: Starting server at tcp:port=8000:interface=127.0.0.1
+[2026-06-08 14:15:13] INFO daphne.server: HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+[2026-06-08 14:15:13] INFO daphne.server: Configuring endpoint tcp:port=8000:interface=127.0.0.1
+[2026-06-08 14:15:13] INFO daphne.server: Listening on TCP address 127.0.0.1:8000
+[2026-06-08 14:17:00] INFO daphne.server: Killed 0 pending application instances
