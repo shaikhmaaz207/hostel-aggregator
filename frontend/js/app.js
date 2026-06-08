@@ -1,5 +1,5 @@
 // ── API CONFIG ──
-const API_BASE = 'http://127.0.0.1:8000/api';
+const API_BASE = 'https://hostel-aggregator.onrender.com/api';
 
 // ── LOCAL FILTER STATE ──
 const filterState = {

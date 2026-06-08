@@ -1,6 +1,6 @@
 // ── CONFIG ──
-const API_BASE = 'http://127.0.0.1:8000/api';
-const WS_BASE  = 'ws://127.0.0.1:8000/ws/chat';
+const API_BASE = 'https://hostel-aggregator.onrender.com/api';
+const WS_BASE  = 'wss://hostel-aggregator.onrender.com/ws/chat';
 
 // ── STATE ──
 const ownerName  = localStorage.getItem('user_name') || 'Owner';

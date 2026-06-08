@@ -1,4 +1,4 @@
-const API_BASE = 'http://127.0.0.1:8000/api';
+const API_BASE = 'https://hostel-aggregator.onrender.com/api';
 const token = localStorage.getItem('access_token');
 const params = new URLSearchParams(window.location.search);
 const hostelId = params.get('hostel_id');
