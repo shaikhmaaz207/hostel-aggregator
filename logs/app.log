@@ -21,3 +21,8 @@
 [2026-06-08 14:22:08] INFO daphne.server: Configuring endpoint tcp:port=8000:interface=127.0.0.1
 [2026-06-08 14:22:08] INFO daphne.server: Listening on TCP address 127.0.0.1:8000
 [2026-06-08 14:22:36] INFO daphne.server: Killed 0 pending application instances
+[2026-06-08 14:30:28] INFO daphne.cli: Starting server at tcp:port=8000:interface=127.0.0.1
+[2026-06-08 14:30:28] INFO daphne.server: HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+[2026-06-08 14:30:28] INFO daphne.server: Configuring endpoint tcp:port=8000:interface=127.0.0.1
+[2026-06-08 14:30:28] INFO daphne.server: Listening on TCP address 127.0.0.1:8000
+[2026-06-08 14:32:41] INFO daphne.server: Killed 0 pending application instances
