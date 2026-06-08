@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: hostel-aggregator
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: daphne -b 0.0.0.0 -p $PORT core.asgi:application
+    envVars:
+      - key: DATABASE_URL
+        value: postgresql://postgres:%40shubham0907@db.usymdtdzublcjphtfebc.supabase.co:5432/postgres
+      - key: SECRET_KEY
+        value: django-insecure-$!9%37=rajvzue)%l3k$doop*ww&8ly5e(pev*bgz9yvqtaf42
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: "*"
+      - key: DJANGO_SETTINGS_MODULE
+        value: core.settings
