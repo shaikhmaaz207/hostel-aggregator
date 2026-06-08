@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard — HostelFinder</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="css/admin.css"/>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="nav-brand">🏠 HostelFinder</div>
+    <div class="nav-links">
+      <span class="nav-admin-badge">🛡️ Admin Panel</span>
+      <span class="nav-owner-name" id="adminName"></span>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <!-- ACCESS DENIED -->
+  <div id="accessDenied" style="display:none;">
+    <div class="access-denied-box">
+      <div class="denied-icon">🚫</div>
+      <h1>Access Denied</h1>
+      <p>This panel is only accessible to Admin accounts.</p>
+      <a href="index.html" class="btn-back-browse">← Back to Browse</a>
+    </div>
+  </div>
+
+  <!-- NOT LOGGED IN -->
+  <div id="notLoggedIn" style="display:none;">
+    <div class="access-denied-box">
+      <div class="denied-icon">🔒</div>
+      <h1>Login Required</h1>
+      <p>Please login as an Admin to access this panel.</p>
+      <a href="login.html" class="btn-back-browse">→ Go to Login</a>
+    </div>
+  </div>
+
+  <!-- ADMIN CONTENT -->
+  <div id="adminContent" style="display:none;">
+
+    <!-- HEADER -->
+    <div class="admin-header">
+      <div class="container">
+        <div>
+          <h1>🛡️ Admin Control Center</h1>
+          <p id="adminSubtitle">Managing platform verification</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATS ROW -->
+    <div class="container">
+      <div class="admin-stats-row">
+        <div class="stat-card">
+          <div class="stat-number" id="totalOwners">0</div>
+          <div class="stat-label">Total Owners</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="verifiedOwners">0</div>
+          <div class="stat-label">Verified Owners</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="pendingOwners">0</div>
+          <div class="stat-label">Pending Verification</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="totalStudents">0</div>
+          <div class="stat-label">Total Students</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="container">
+      <div class="admin-tabs">
+        <button class="tab-btn active" id="tab-owners"
+          onclick="switchTab('owners')">
+          🏠 Owner Verification
+        </button>
+        <button class="tab-btn" id="tab-students"
+          onclick="switchTab('students')">
+          👤 Students
+        </button>
+      </div>
+    </div>
+
+    <!-- TAB: OWNERS -->
+    <div class="container tab-panel" id="panel-owners">
+      <div id="ownersLoading" class="admin-loading">
+        Loading owners...
+      </div>
+      <div id="ownersTable"></div>
+      <div id="noOwners" style="display:none;" class="no-data-box">
+        <p>No owners registered yet.</p>
+      </div>
+    </div>
+
+    <!-- TAB: STUDENTS -->
+    <div class="container tab-panel" id="panel-students" style="display:none;">
+      <div id="studentsLoading" class="admin-loading">
+        Loading students...
+      </div>
+      <div id="studentsTable"></div>
+      <div id="noStudents" style="display:none;" class="no-data-box">
+        <p>No students registered yet.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <p>© 2026 HostelFinder · Admin Panel</p>
+  </footer>
+
+  <script src="js/admin.js"></script>
+</body>
+</html>

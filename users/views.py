@@ -65,3 +65,29 @@ class UpdateProfileView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class GetAllUsersView(APIView):
+    authentication_classes = [CustomJWTAuthentication]
+    permission_classes     = [IsAuthenticated]
+
+    def get(self, request):
+        # Only admin can see all users
+        if request.user.role != 'Admin':
+            return Response(
+                {"error": "Only Admin can view all users"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        users = User.objects.all().order_by('role', 'name')
+        data  = []
+        for user in users:
+            data.append({
+                'id':          user.id,
+                'name':        user.name,
+                'email':       user.email,
+                'role':        user.role,
+                'is_verified': user.is_verified,
+                'created_at':  user.created_at,
+            })
+
+        return Response(data, status=status.HTTP_200_OK)
