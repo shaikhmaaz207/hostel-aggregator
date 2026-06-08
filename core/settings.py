@@ -47,7 +47,10 @@ INSTALLED_APPS = [
     'reviews',
 ]
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  
+    'core.middleware.SecurityHeadersMiddleware',  # HA-38 Security headers
+    'core.middleware.RateLimiterMiddleware',       # HA-38 Rate limiting
+    'core.middleware.InputSanitizerMiddleware',    # HA-38 Input sanitization
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -143,8 +146,32 @@ SIMPLE_JWT = {
     'TOKEN_TYPE_CLAIM': 'token_type',
     'JTI_CLAIM': 'jti',
 }
-CORS_ALLOW_ALL_ORIGINS = True
+# HA-38: Secure CORS — only allow specific origins
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOWED_ORIGINS = [
+    'http://127.0.0.1:8000',
+    'http://localhost:8000',
+    # Add your production URL here when deploying
+    # 'https://your-production-domain.com',
+]
 
+CORS_ALLOW_METHODS = [
+    'GET',
+    'POST',
+    'PUT',
+    'PATCH',
+    'DELETE',
+    'OPTIONS',
+]
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'origin',
+    'x-csrftoken',
+]
 import os
 
 # Media files (uploaded images)
@@ -162,3 +189,10 @@ CHANNEL_LAYERS = {
 # Force UTF-8 encoding
 DEFAULT_CHARSET = 'utf-8'
 FILE_CHARSET = 'utf-8'
+# HA-38: Cache for rate limiting
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'hostel-aggregator-cache',
+    }
+}
