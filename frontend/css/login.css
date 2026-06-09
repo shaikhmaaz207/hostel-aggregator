@@ -143,3 +143,75 @@
   font-size: 0.9rem;
   font-weight: 500;
 }
+/* class name aliases used by register.html */
+.login-page  { /* same as .login-container */
+  min-height: calc(100vh - 70px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background: #f4f6f9;
+}
+
+.login-card  { /* same as .login-box */
+  background: #fff;
+  border-radius: 20px;
+  padding: 48px 40px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  text-align: center;
+  margin: 0 auto;
+}
+.login-error {
+  background: #fff0f0;
+  color: #e94560;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+/* ── REGISTER PAGE ALIASES ── */
+.login-page {
+  min-height: calc(100vh - 70px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background: #f4f6f9;
+}
+
+.login-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 48px 40px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  text-align: center;
+  margin: 0 auto;
+}
+
+.login-header { margin-bottom: 28px; }
+
+.login-header h1 {
+  font-size: 1.7rem;
+  color: #1a1a2e;
+  margin-bottom: 8px;
+}
+
+.login-header p {
+  color: #888;
+  font-size: 0.95rem;
+}
+
+.login-error {
+  background: #fff0f0;
+  color: #e94560;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}

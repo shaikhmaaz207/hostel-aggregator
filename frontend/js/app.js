@@ -92,9 +92,21 @@ function renderHostels(data) {
 
   data.forEach((hostel, i) => {
     const emoji = emojis[i % emojis.length];
+
+    // HA-43: Use real image with lazy loading if available, else emoji fallback
+    const imageHTML = hostel.image_url
+      ? `<img
+           src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E"
+           data-src="${hostel.image_url}"
+           loading="lazy"
+           class="card-img lazy"
+           alt="${hostel.title}"
+         />`
+      : `<span class="card-emoji">${emoji}</span>`;
+
     grid.innerHTML += `
       <div class="hostel-card">
-        <div class="card-image">${emoji}</div>
+        <div class="card-image">${imageHTML}</div>
         <div class="card-body">
           <div class="card-title">${hostel.title}</div>
           <div class="card-location">📍 ${hostel.address}</div>
@@ -115,6 +127,39 @@ function renderHostels(data) {
       </div>
     `;
   });
+
+  // HA-43: Init lazy observer after cards are in the DOM
+  initLazyImages();
+}
+
+// ────────────────────────────────────────
+// HA-43: LAZY IMAGE OBSERVER
+// ────────────────────────────────────────
+function initLazyImages() {
+  const lazyImgs = document.querySelectorAll('img.lazy');
+  if (!lazyImgs.length) return;
+
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const img = entry.target;
+          img.src = img.dataset.src;
+          img.classList.remove('lazy');
+          img.classList.add('loaded');
+          observer.unobserve(img);
+        }
+      });
+    }, { rootMargin: '200px 0px' }); // load 200px before visible
+
+    lazyImgs.forEach(img => observer.observe(img));
+  } else {
+    // Fallback for very old browsers
+    lazyImgs.forEach(img => {
+      img.src = img.dataset.src;
+      img.classList.add('loaded');
+    });
+  }
 }
 
 // ────────────────────────────────────────
@@ -228,4 +273,3 @@ function viewHostel(id) {
 
 // ── INIT ──
 fetchHostels();
-
