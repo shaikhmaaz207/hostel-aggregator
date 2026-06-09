@@ -39,6 +39,8 @@ async function login() {
       setTimeout(() => {
         if (data.role === 'Owner') {
           window.location.href = 'dashboard.html';
+        } else if (data.role === 'Admin') {
+          window.location.href = 'analytics.html';
         } else {
           window.location.href = 'index.html';
         }
