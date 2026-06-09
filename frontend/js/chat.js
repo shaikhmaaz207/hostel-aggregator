@@ -1,5 +1,5 @@
 // ── CONFIG ──
-const WS_BASE = 'wss://hostel-aggregator.onrender.com/ws/chat';
+const WS_BASE = 'wss://hostel-aggregator-r1f5.onrender.com/ws/chat';
 
 // ── STATE ──
 const params     = new URLSearchParams(window.location.search);

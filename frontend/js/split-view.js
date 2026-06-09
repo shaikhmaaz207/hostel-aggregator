@@ -1,5 +1,5 @@
 // ── CONFIG ──
-const API_BASE = 'https://hostel-aggregator.onrender.com/api';
+const API_BASE = 'https://hostel-aggregator-r1f5.onrender.com/api';
 const emojis   = ['🏢', '🏠', '🏨', '🏡', '🏘', '🏰'];
 
 // ── STATE ──

@@ -1,6 +1,6 @@
 // ── CONFIG ──
-const API_BASE = 'https://hostel-aggregator.onrender.com/api';
-const WS_BASE  = 'wss://hostel-aggregator.onrender.com/ws/chat';
+const API_BASE = 'https://hostel-aggregator-r1f5.onrender.com/api';
+const WS_BASE  = 'wss://hostel-aggregator-r1f5.onrender.com/ws/chat';
 
 // ── STATE ──
 const ownerName  = localStorage.getItem('user_name') || 'Owner';
