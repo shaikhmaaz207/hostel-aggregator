@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Analytics — HostelFinder</title>
+
+  <link rel="preconnect" href="https://hostel-aggregator-r1f5.onrender.com" crossorigin/>
+  <link rel="dns-prefetch" href="https://hostel-aggregator-r1f5.onrender.com"/>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="css/analytics.css"/>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="nav-brand">🏠 HostelFinder</div>
+    <div class="nav-links">
+      <a href="index.html">← Browse</a>
+      <span class="nav-admin-badge">Admin Panel</span>
+      <a href="#" onclick="logout()">Logout</a>
+    </div>
+  </nav>
+
+  <!-- ACCESS DENIED (shown if not admin) -->
+  <div id="accessDenied" class="access-denied" style="display:none;">
+    <div class="denied-box">
+      <div class="denied-icon">🔒</div>
+      <h2>Access Restricted</h2>
+      <p>This dashboard is only available to Admin accounts.</p>
+      <a href="login.html" class="btn-go-login">Go to Login</a>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="dashboard" style="display:none;">
+
+    <!-- HEADER -->
+    <div class="analytics-header">
+      <div>
+        <h1 class="analytics-title">Platform Analytics</h1>
+        <p class="analytics-subtitle" id="generatedAt">Fetching live data...</p>
+      </div>
+      <button class="btn-refresh" onclick="loadAnalytics()">
+        🔄 Refresh
+      </button>
+    </div>
+
+    <!-- LOADING -->
+    <div id="analyticsLoading" class="analytics-loading">
+      <div class="loading-spinner"></div>
+      <p>Loading metrics...</p>
+    </div>
+
+    <!-- ERROR -->
+    <div id="analyticsError" class="analytics-error" style="display:none;">
+      <p>⚠️ Failed to load analytics. <a href="#" onclick="loadAnalytics()">Try again</a></p>
+    </div>
+
+    <!-- CONTENT -->
+    <div id="analyticsContent" style="display:none;">
+
+      <!-- HEALTH BAR -->
+      <div class="health-bar" id="healthBar">
+        <span class="health-dot"></span>
+        <span id="healthText">All systems operational</span>
+        <span class="health-divider">·</span>
+        <span id="healthDb">Database connected</span>
+      </div>
+
+      <!-- SECTION: USERS -->
+      <div class="section-label">Users</div>
+      <div class="stats-grid">
+
+        <div class="stat-card stat-primary">
+          <div class="stat-icon">👥</div>
+          <div class="stat-body">
+            <div class="stat-value" id="totalUsers">—</div>
+            <div class="stat-label">Total Users</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">🎓</div>
+          <div class="stat-body">
+            <div class="stat-value" id="totalStudents">—</div>
+            <div class="stat-label">Students</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">🏠</div>
+          <div class="stat-body">
+            <div class="stat-value" id="totalOwners">—</div>
+            <div class="stat-label">Owners</div>
+          </div>
+        </div>
+
+        <div class="stat-card stat-accent">
+          <div class="stat-icon">✅</div>
+          <div class="stat-body">
+            <div class="stat-value" id="verifiedOwners">—</div>
+            <div class="stat-label">Verified Owners</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- SECTION: PLATFORM -->
+      <div class="section-label">Platform</div>
+      <div class="stats-grid">
+
+        <div class="stat-card">
+          <div class="stat-icon">🏨</div>
+          <div class="stat-body">
+            <div class="stat-value" id="totalHostels">—</div>
+            <div class="stat-label">Listed Hostels</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">⭐</div>
+          <div class="stat-body">
+            <div class="stat-value" id="totalReviews">—</div>
+            <div class="stat-label">Reviews</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">💬</div>
+          <div class="stat-body">
+            <div class="stat-value" id="totalMessages">—</div>
+            <div class="stat-label">Messages Sent</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- SECTION: BOOKINGS -->
+      <div class="section-label">Bookings</div>
+      <div class="stats-grid">
+
+        <div class="stat-card">
+          <div class="stat-icon">📋</div>
+          <div class="stat-body">
+            <div class="stat-value" id="totalBookings">—</div>
+            <div class="stat-label">Total Bookings</div>
+          </div>
+        </div>
+
+        <div class="stat-card stat-warning">
+          <div class="stat-icon">⏳</div>
+          <div class="stat-body">
+            <div class="stat-value" id="pendingBookings">—</div>
+            <div class="stat-label">Pending</div>
+          </div>
+        </div>
+
+        <div class="stat-card stat-success">
+          <div class="stat-icon">🎉</div>
+          <div class="stat-body">
+            <div class="stat-value" id="approvedBookings">—</div>
+            <div class="stat-label">Approved</div>
+          </div>
+        </div>
+
+        <div class="stat-card stat-danger">
+          <div class="stat-icon">❌</div>
+          <div class="stat-body">
+            <div class="stat-value" id="rejectedBookings">—</div>
+            <div class="stat-label">Rejected</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- BOOKING BREAKDOWN BAR -->
+      <div class="breakdown-card">
+        <div class="breakdown-title">Booking Status Breakdown</div>
+        <div class="breakdown-bar">
+          <div class="bar-seg bar-approved" id="barApproved" title="Approved"></div>
+          <div class="bar-seg bar-pending"  id="barPending"  title="Pending"></div>
+          <div class="bar-seg bar-rejected" id="barRejected" title="Rejected"></div>
+        </div>
+        <div class="breakdown-legend">
+          <span><span class="legend-dot dot-approved"></span>Approved</span>
+          <span><span class="legend-dot dot-pending"></span>Pending</span>
+          <span><span class="legend-dot dot-rejected"></span>Rejected</span>
+        </div>
+      </div>
+
+      <!-- SECTION: THIS WEEK -->
+      <div class="section-label">This Week</div>
+      <div class="stats-grid stats-grid-3">
+
+        <div class="stat-card stat-week">
+          <div class="stat-icon">🆕</div>
+          <div class="stat-body">
+            <div class="stat-value" id="newStudents">—</div>
+            <div class="stat-label">New Students</div>
+            <div class="stat-sub">Last 7 days</div>
+          </div>
+        </div>
+
+        <div class="stat-card stat-week">
+          <div class="stat-icon">📅</div>
+          <div class="stat-body">
+            <div class="stat-value" id="newBookings">—</div>
+            <div class="stat-label">New Bookings</div>
+            <div class="stat-sub">Last 7 days</div>
+          </div>
+        </div>
+
+        <div class="stat-card stat-week">
+          <div class="stat-icon">✍️</div>
+          <div class="stat-body">
+            <div class="stat-value" id="newReviews">—</div>
+            <div class="stat-label">New Reviews</div>
+            <div class="stat-sub">Last 7 days</div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+    <!-- end analyticsContent -->
+
+  </div>
+  <!-- end dashboard -->
+
+  <footer class="footer">
+    <p>© 2026 HostelFinder · Admin View</p>
+  </footer>
+
+  <script src="js/analytics.js" defer></script>
+</body>
+</html>
