@@ -168,8 +168,8 @@ CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1:8000',
     'http://localhost:8000',
-    # Add your production URL here when deploying
-    # 'https://your-production-domain.com',
+    'https://whimsical-palmier-5a0182.netlify.app',
+    'https://6a27a04479e4ea17dafc040c--whimsical-palmier-5a0182.netlify.app',
 ]
 
 CORS_ALLOW_METHODS = [
