@@ -3,12 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>HostelFinder — Find Your Perfect PG</title>
+
+  <!-- HA-43: Preconnect to backend for faster API calls -->
+  <link rel="preconnect" href="https://hostel-aggregator-r1f5.onrender.com" crossorigin/>
+  <link rel="dns-prefetch" href="https://hostel-aggregator-r1f5.onrender.com"/>
+
+  <!-- HA-43: Preload critical CSS -->
+  <link rel="preload" href="css/style.css" as="style"/>
+  <link rel="preload" href="css/browse.css" as="style"/>
+
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/browse.css" />
 </head>
@@ -136,14 +140,13 @@
           <h2 class="section-title">
             Available Hostels <span id="count"></span>
           </h2>
-          <!-- Loading indicator -->
           <div id="loadingIndicator" class="loading-indicator" style="display:none;">
             <div class="spinner"></div>
             <span>Searching...</span>
           </div>
         </div>
 
-        <!-- Skeleton Loaders (shown during fetch) -->
+        <!-- Skeleton Loaders -->
         <div id="skeletonGrid" class="hostel-grid" style="display:none;">
           <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-line w80"></div><div class="skeleton-line w60"></div><div class="skeleton-line w40"></div></div>
           <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-line w80"></div><div class="skeleton-line w60"></div><div class="skeleton-line w40"></div></div>
@@ -168,7 +171,8 @@
     <p>© 2026 HostelFinder · Built for students, by students</p>
   </footer>
 
-  <script src="js/app.js"></script>
+  <!-- HA-43: defer so script doesn't block page render -->
+  <script src="js/app.js" defer></script>
 
 </body>
 </html>

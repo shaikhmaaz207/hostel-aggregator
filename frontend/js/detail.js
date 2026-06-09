@@ -55,7 +55,21 @@ function populatePage(hostel) {
   const emoji = emojis[(hostel.id - 1) % emojis.length];
   const rent  = `₹${Number(hostel.rent_amount).toLocaleString()}`;
 
-  document.getElementById('detailEmoji').textContent    = emoji;
+  // HA-43: Lazy-load hero image if available, else emoji fallback
+  const heroEl = document.getElementById('detailEmoji');
+  if (hostel.image_url) {
+    const img = document.createElement('img');
+    img.src              = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\'/%3E';
+    img.dataset.src      = hostel.image_url;
+    img.alt              = hostel.title;
+    img.loading          = 'lazy';
+    img.className        = 'hero-img lazy';
+    heroEl.appendChild(img);
+    initHeroLazy(img);
+  } else {
+    heroEl.textContent = emoji;
+  }
+
   document.getElementById('detailTitle').textContent    = hostel.title;
   document.getElementById('detailPrice').textContent    = `${rent}/mo`;
   document.getElementById('detailLocation').textContent = hostel.address;
@@ -68,8 +82,10 @@ function populatePage(hostel) {
     `${hostel.latitude}, ${hostel.longitude}`;
   document.getElementById('specDate').textContent    = formatDate(hostel.created_at);
 
-  const mapUrl = `https://www.google.com/maps?q=${hostel.latitude},${hostel.longitude}`;
-  document.getElementById('mapLink').href    = mapUrl;
+  // HA-43: OpenStreetMap instead of Google Maps
+  const mapUrl = `https://www.openstreetmap.org/?mlat=${hostel.latitude}&mlon=${hostel.longitude}&zoom=16`;
+  document.getElementById('mapLink').href = mapUrl;
+
   document.getElementById('contactPrice').textContent = `${rent}/month`;
   document.title = `${hostel.title} — HostelFinder`;
 
@@ -89,6 +105,28 @@ function populatePage(hostel) {
   document.getElementById('reviewComment').addEventListener('input', function() {
     document.getElementById('charCount').textContent = this.value.length;
   });
+}
+
+// ────────────────────────────────────────
+// HA-43: LAZY HERO IMAGE OBSERVER
+// ────────────────────────────────────────
+function initHeroLazy(img) {
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          img.src = img.dataset.src;
+          img.classList.remove('lazy');
+          img.classList.add('loaded');
+          observer.unobserve(img);
+        }
+      });
+    }, { rootMargin: '200px 0px' });
+    observer.observe(img);
+  } else {
+    img.src = img.dataset.src;
+    img.classList.add('loaded');
+  }
 }
 
 // ────────────────────────────────────────
@@ -181,13 +219,11 @@ function renderReviews(reviews) {
   reviews.forEach(review => {
     const existingReply = review.owner_reply || review.reply || null;
 
-    // Reply toggle button — only for owners with no reply yet
     const replyToggleBtn = (isOwner && !existingReply)
       ? `<button class="btn-reply-toggle" id="reply-toggle-${review.id}"
            onclick="toggleReplyForm(${review.id})">✏️ Reply</button>`
       : '';
 
-    // Reply section
     let replyHTML = '';
     if (existingReply) {
       replyHTML = `
@@ -248,7 +284,6 @@ function renderReviews(reviews) {
 
     container.appendChild(item);
 
-    // Attach char counter for reply textarea
     if (isOwner && !existingReply) {
       const textarea = document.getElementById(`reply-input-${review.id}`);
       const charEl   = document.getElementById(`reply-char-${review.id}`);
@@ -503,10 +538,10 @@ function closeModal() {
 }
 
 async function submitBooking() {
-  const date    = document.getElementById('bookingDate').value;
-  const errorEl = document.getElementById('modalError');
+  const date      = document.getElementById('bookingDate').value;
+  const errorEl   = document.getElementById('modalError');
   const successEl = document.getElementById('modalSuccess');
-  const btn     = document.getElementById('confirmBtn');
+  const btn       = document.getElementById('confirmBtn');
 
   errorEl.style.display   = 'none';
   successEl.style.display = 'none';

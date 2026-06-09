@@ -4,6 +4,15 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Hostel Detail — HostelFinder</title>
+
+  <!-- HA-43: Preconnect to backend for faster API calls -->
+  <link rel="preconnect" href="https://hostel-aggregator-r1f5.onrender.com" crossorigin/>
+  <link rel="dns-prefetch" href="https://hostel-aggregator-r1f5.onrender.com"/>
+
+  <!-- HA-43: Preload critical CSS -->
+  <link rel="preload" href="css/style.css" as="style"/>
+  <link rel="preload" href="css/detail.css" as="style"/>
+
   <link rel="stylesheet" href="css/style.css"/>
   <link rel="stylesheet" href="css/detail.css"/>
   <link rel="stylesheet" href="css/chat.css"/>
@@ -98,11 +107,11 @@
           </div>
         </div>
 
-        <!-- MAP LINK -->
+        <!-- MAP LINK — HA-43: OpenStreetMap instead of Google Maps -->
         <div class="detail-card">
           <h2 class="detail-section-title">Location</h2>
           <a id="mapLink" href="#" target="_blank" class="map-btn">
-            📍 Open in Google Maps
+            📍 Open in OpenStreetMap
           </a>
         </div>
 
@@ -256,7 +265,8 @@
     <p>© 2026 HostelFinder · Built for students, by students</p>
   </footer>
 
-  <script src="js/detail.js"></script>
+  <!-- HA-43: defer so script doesn't block page render -->
+  <script src="js/detail.js" defer></script>
 
 </body>
 </html>
