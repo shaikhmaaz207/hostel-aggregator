@@ -4,7 +4,7 @@ const emojis   = ['🏢', '🏠', '🏨', '🏡', '🏘', '🏰'];
 // ── STATE ──
 let currentHostelId  = null;
 let selectedRating   = 0;
-let reviewsLocalList = [];   // local state array for instant UI update
+let reviewsLocalList = [];
 
 // ────────────────────────────────────────
 // GET ID FROM URL
@@ -60,7 +60,7 @@ function populatePage(hostel) {
   document.getElementById('detailPrice').textContent    = `${rent}/mo`;
   document.getElementById('detailLocation').textContent = hostel.address;
   document.getElementById('detailDescription').textContent =
-    hostel.description || 'No description provided by the owner.';
+    hostel.description || 'No description provided.';
 
   document.getElementById('specRent').textContent    = `${rent} per month`;
   document.getElementById('specAddress').textContent = hostel.address;
@@ -69,8 +69,7 @@ function populatePage(hostel) {
   document.getElementById('specDate').textContent    = formatDate(hostel.created_at);
 
   const mapUrl = `https://www.google.com/maps?q=${hostel.latitude},${hostel.longitude}`;
-  document.getElementById('mapLink').href = mapUrl;
-
+  document.getElementById('mapLink').href    = mapUrl;
   document.getElementById('contactPrice').textContent = `${rent}/month`;
   document.title = `${hostel.title} — HostelFinder`;
 
@@ -85,38 +84,35 @@ function populatePage(hostel) {
     document.getElementById('reviewForm').style.display     = 'none';
   }
 
-  // Init star input
   initStarInput();
 
-  // Char counter
   document.getElementById('reviewComment').addEventListener('input', function() {
     document.getElementById('charCount').textContent = this.value.length;
   });
 }
 
 // ────────────────────────────────────────
-// FETCH REVIEWS FROM API
+// FETCH REVIEWS
 // ────────────────────────────────────────
 async function fetchReviews(hostelId) {
   try {
+    const token    = localStorage.getItem('access_token');
     const response = await fetch(`${API_BASE}/hostels/${hostelId}/reviews/`, {
-      headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-      }
-  });
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-    const data = await response.json();
+    const data    = await response.json();
     const reviews = data.reviews || data;
     reviewsLocalList = reviews;
-    
+
     document.getElementById('reviewsLoading').style.display = 'none';
     renderReviews(reviews);
     renderAverageRating(reviews);
 
   } catch (error) {
-    document.getElementById('reviewsLoading').textContent =
-      'Could not load reviews.';
+    document.getElementById('reviewsLoading').textContent = 'Could not load reviews.';
   }
 }
 
@@ -124,9 +120,9 @@ async function fetchReviews(hostelId) {
 // RENDER AVERAGE RATING
 // ────────────────────────────────────────
 function renderAverageRating(reviews) {
-  const numEl    = document.getElementById('avgRatingNumber');
-  const starsEl  = document.getElementById('avgStarsDisplay');
-  const countEl  = document.getElementById('avgRatingCount');
+  const numEl   = document.getElementById('avgRatingNumber');
+  const starsEl = document.getElementById('avgStarsDisplay');
+  const countEl = document.getElementById('avgRatingCount');
 
   if (reviews.length === 0) {
     numEl.textContent   = '—';
@@ -144,19 +140,16 @@ function renderAverageRating(reviews) {
 }
 
 // ────────────────────────────────────────
-// RENDER FRACTIONAL STARS (display only)
+// RENDER FRACTIONAL STARS
 // ────────────────────────────────────────
 function renderStars(rating) {
   let html = '';
   for (let i = 1; i <= 5; i++) {
     if (rating >= i) {
-      // Full star
       html += `<span class="star full">★</span>`;
     } else if (rating >= i - 0.5) {
-      // Half star using CSS clip
       html += `<span class="star half">★</span>`;
     } else {
-      // Empty star
       html += `<span class="star empty">★</span>`;
     }
   }
@@ -164,12 +157,15 @@ function renderStars(rating) {
 }
 
 // ────────────────────────────────────────
-// RENDER REVIEW LIST
+// RENDER REVIEWS
 // ────────────────────────────────────────
 function renderReviews(reviews) {
   const container = document.getElementById('reviewsList');
   const noReviews = document.getElementById('noReviews');
   const countEl   = document.getElementById('reviewListCount');
+  const token     = localStorage.getItem('access_token');
+  const role      = localStorage.getItem('role');
+  const isOwner   = token && role === 'Owner';
 
   container.innerHTML = '';
 
@@ -182,177 +178,77 @@ function renderReviews(reviews) {
   noReviews.style.display = 'none';
   countEl.textContent     = `(${reviews.length})`;
 
-  const token     = localStorage.getItem('access_token');
-  const role      = localStorage.getItem('role');
-  const isOwner   = token && role === 'Owner';
-
   reviews.forEach(review => {
+    const existingReply = review.owner_reply || review.reply || null;
+
+    // Reply toggle button — only for owners with no reply yet
+    const replyToggleBtn = (isOwner && !existingReply)
+      ? `<button class="btn-reply-toggle" id="reply-toggle-${review.id}"
+           onclick="toggleReplyForm(${review.id})">✏️ Reply</button>`
+      : '';
+
+    // Reply section
+    let replyHTML = '';
+    if (existingReply) {
+      replyHTML = `
+        <div class="owner-reply">
+          <div class="owner-reply-tag">🏠 Owner Response</div>
+          <div class="owner-reply-text">${escapeHTML(existingReply)}</div>
+        </div>`;
+    } else if (isOwner) {
+      replyHTML = `
+        <div class="reply-form" id="reply-form-${review.id}" style="display:none;">
+          <textarea
+            id="reply-input-${review.id}"
+            class="reply-textarea"
+            placeholder="Write a response to this review..."
+            maxlength="400"
+            rows="2"
+          ></textarea>
+          <div class="reply-form-actions">
+            <span class="reply-char-count">
+              <span id="reply-char-${review.id}">0</span>/400
+            </span>
+            <div class="reply-btns">
+              <button class="btn-reply-cancel"
+                onclick="cancelReply(${review.id})">Cancel</button>
+              <button class="btn-reply-submit"
+                id="reply-btn-${review.id}"
+                onclick="submitReply(${review.id})">Post Response</button>
+            </div>
+          </div>
+          <div class="reply-error" id="reply-error-${review.id}"
+            style="display:none;"></div>
+        </div>`;
+    }
+
     const item = document.createElement('div');
     item.className = 'review-item';
-    item.id        = `review-${review.id}`;
-
-    // Owner reply block — show existing reply or reply form for owner
-    const existingReply = review.owner_reply || review.reply || null;
-
-    const replyHTML = existingReply
-      ? `<div class="owner-reply">
-           <div class="owner-reply-tag">🏠 Owner Response</div>
-           <div class="owner-reply-text">${escapeHTML(existingReply)}</div>
-         </div>`
-      : isOwner
-      ? `<div class="reply-form" id="reply-form-${review.id}">
-           <textarea
-             id="reply-input-${review.id}"
-             class="reply-textarea"
-             placeholder="Write a response to this review..."
-             maxlength="400"
-             rows="2"
-           ></textarea>
-           <div class="reply-form-actions">
-             <span class="reply-char-count">
-               <span id="reply-char-${review.id}">0</span>/400
-             </span>
-             <div class="reply-btns">
-               <button class="btn-reply-cancel"
-                 onclick="cancelReply(${review.id})">
-                 Cancel
-               </button>
-               <button class="btn-reply-submit"
-                 id="reply-btn-${review.id}"
-                 onclick="submitReply(${review.id})">
-                 Post Response
-               </button>
-             </div>
-           </div>
-           <div class="reply-error" id="reply-error-${review.id}"
-             style="display:none;"></div>
-         </div>`
-      : '';
-
-    // Reply toggle button — only for owner when no reply exists
-    const replyToggleBtn = isOwner && !existingReply
-      ? `<button class="btn-reply-toggle"
-           id="reply-toggle-${review.id}"
-           onclick="toggleReplyForm(${review.id})">
-           ✏️ Reply
-         </button>`
-      : '';
-
     item.innerHTML = `
       <div class="review-header">
         <div class="review-avatar">
-          ${getInitials(review.student_name || review.user || 'Student')}
+          ${getInitials(review.student_name || 'Student')}
         </div>
         <div class="review-meta">
           <div class="review-author">
-            ${review.student_name || review.user || 'Anonymous Student'}
+            ${review.student_name || 'Anonymous Student'}
           </div>
           <div class="review-date">${formatDate(review.created_at)}</div>
         </div>
         <div class="review-header-right">
-          <div class="review-stars">
-            ${renderStars(review.rating)}
-          </div>
+          <div class="review-stars">${renderStars(review.rating)}</div>
           ${replyToggleBtn}
         </div>
       </div>
       <div class="review-comment">
-        ${escapeHTML(review.comment || review.review_text || '')}
+        ${escapeHTML(review.comment || '')}
       </div>
       ${replyHTML}
     `;
 
     container.appendChild(item);
 
-    // Attach char counter for reply textarea if owner
-    if (isOwner && !existingReply) {
-      const textarea = document.getElementById(`reply-input-${review.id}`);
-      const charEl   = document.getElementById(`reply-char-${review.id}`);
-      if (textarea && charEl) {
-        textarea.addEventListener('input', () => {
-          charEl.textContent = textarea.value.length;
-        });
-      }
-    }
-  });
-}
-
-  
-
-    // Owner reply block — show existing reply or reply form for owner
-    const existingReply = review.owner_reply || review.reply || null;
-
-    const replyHTML = existingReply
-      ? `<div class="owner-reply">
-           <div class="owner-reply-tag">🏠 Owner Response</div>
-           <div class="owner-reply-text">${escapeHTML(existingReply)}</div>
-         </div>`
-      : isOwner
-      ? `<div class="reply-form" id="reply-form-${review.id}">
-           <textarea
-             id="reply-input-${review.id}"
-             class="reply-textarea"
-             placeholder="Write a response to this review..."
-             maxlength="400"
-             rows="2"
-           ></textarea>
-           <div class="reply-form-actions">
-             <span class="reply-char-count">
-               <span id="reply-char-${review.id}">0</span>/400
-             </span>
-             <div class="reply-btns">
-               <button class="btn-reply-cancel"
-                 onclick="cancelReply(${review.id})">
-                 Cancel
-               </button>
-               <button class="btn-reply-submit"
-                 id="reply-btn-${review.id}"
-                 onclick="submitReply(${review.id})">
-                 Post Response
-               </button>
-             </div>
-           </div>
-           <div class="reply-error" id="reply-error-${review.id}"
-             style="display:none;"></div>
-         </div>`
-      : '';
-
-    // Reply toggle button — only for owner when no reply exists
-    const replyToggleBtn = isOwner && !existingReply
-      ? `<button class="btn-reply-toggle"
-           id="reply-toggle-${review.id}"
-           onclick="toggleReplyForm(${review.id})">
-           ✏️ Reply
-         </button>`
-      : '';
-
-    item.innerHTML = `
-      <div class="review-header">
-        <div class="review-avatar">
-          ${getInitials(review.student_name || review.user || 'Student')}
-        </div>
-        <div class="review-meta">
-          <div class="review-author">
-            ${review.student_name || review.user || 'Anonymous Student'}
-          </div>
-          <div class="review-date">${formatDate(review.created_at)}</div>
-        </div>
-        <div class="review-header-right">
-          <div class="review-stars">
-            ${renderStars(review.rating)}
-          </div>
-          ${replyToggleBtn}
-        </div>
-      </div>
-      <div class="review-comment">
-        ${escapeHTML(review.comment || review.review_text || '')}
-      </div>
-      ${replyHTML}
-    `;
-
-    container.appendChild(item);
-
-    // Attach char counter for reply textarea if owner
+    // Attach char counter for reply textarea
     if (isOwner && !existingReply) {
       const textarea = document.getElementById(`reply-input-${review.id}`);
       const charEl   = document.getElementById(`reply-char-${review.id}`);
@@ -366,36 +262,29 @@ function renderReviews(reviews) {
 }
 
 // ────────────────────────────────────────
-// STAR INPUT — INTERACTIVE
+// STAR INPUT
 // ────────────────────────────────────────
 function initStarInput() {
-  const stars = document.querySelectorAll('.star-btn');
-  const label = document.getElementById('starInputLabel');
-
+  const stars  = document.querySelectorAll('.star-btn');
+  const label  = document.getElementById('starInputLabel');
   const labels = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
 
   stars.forEach(star => {
-    // Hover effect
     star.addEventListener('mouseenter', () => {
-      const val = parseInt(star.dataset.value);
-      highlightStars(val);
-      label.textContent = labels[val];
+      highlightStars(parseInt(star.dataset.value));
+      label.textContent = labels[parseInt(star.dataset.value)];
     });
 
-    // Mouse leave — restore selected state
     star.addEventListener('mouseleave', () => {
       highlightStars(selectedRating);
-      label.textContent = selectedRating > 0
-        ? labels[selectedRating]
-        : 'Click to rate';
+      label.textContent = selectedRating > 0 ? labels[selectedRating] : 'Click to rate';
     });
 
-    // Click — set rating
     star.addEventListener('click', () => {
-      selectedRating = parseInt(star.dataset.value);
+      selectedRating        = parseInt(star.dataset.value);
       highlightStars(selectedRating);
-      label.textContent = labels[selectedRating];
-      label.style.color = '#e94560';
+      label.textContent     = labels[selectedRating];
+      label.style.color     = '#e94560';
     });
   });
 }
@@ -410,16 +299,14 @@ function highlightStars(value) {
 // SUBMIT REVIEW
 // ────────────────────────────────────────
 async function submitReview() {
-  const comment = document.getElementById('reviewComment').value.trim();
-  const errorEl = document.getElementById('reviewError');
+  const comment   = document.getElementById('reviewComment').value.trim();
+  const errorEl   = document.getElementById('reviewError');
   const successEl = document.getElementById('reviewSuccess');
-  const btn     = document.getElementById('submitReviewBtn');
+  const btn       = document.getElementById('submitReviewBtn');
 
-  // Hide previous messages
   errorEl.style.display   = 'none';
   successEl.style.display = 'none';
 
-  // Validate
   if (selectedRating === 0) {
     errorEl.textContent   = 'Please select a star rating.';
     errorEl.style.display = 'block';
@@ -431,11 +318,11 @@ async function submitReview() {
     return;
   }
 
-  const token = localStorage.getItem('access_token');
+  const token    = localStorage.getItem('access_token');
   const userName = localStorage.getItem('user_name') || 'Student';
 
-  btn.disabled     = true;
-  btn.textContent  = 'Submitting...';
+  btn.disabled    = true;
+  btn.textContent = 'Submitting...';
 
   try {
     const response = await fetch(`${API_BASE}/hostels/${currentHostelId}/reviews/`, {
@@ -444,18 +331,13 @@ async function submitReview() {
         'Content-Type':  'application/json',
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify({
-        rating:  selectedRating,
-        comment: comment
-    })
+      body: JSON.stringify({ rating: selectedRating, comment: comment })
     });
 
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
     const newReview = await response.json();
 
-    // ── INSTANT UI UPDATE (DoD requirement) ──
-    // Add to local state array
     const localReview = {
       ...newReview,
       student_name: userName,
@@ -463,21 +345,18 @@ async function submitReview() {
       rating:       selectedRating,
       comment:      comment
     };
-    reviewsLocalList.unshift(localReview);
 
-    // Re-render reviews and average instantly
+    reviewsLocalList.unshift(localReview);
     renderReviews(reviewsLocalList);
     renderAverageRating(reviewsLocalList);
 
-    // Show success
     successEl.textContent   = '✅ Your review has been submitted!';
     successEl.style.display = 'block';
 
-    // Reset form
     selectedRating = 0;
     highlightStars(0);
-    document.getElementById('reviewComment').value = '';
-    document.getElementById('charCount').textContent = '0';
+    document.getElementById('reviewComment').value        = '';
+    document.getElementById('charCount').textContent      = '0';
     document.getElementById('starInputLabel').textContent = 'Click to rate';
     document.getElementById('starInputLabel').style.color = '';
 
@@ -491,41 +370,6 @@ async function submitReview() {
 }
 
 // ────────────────────────────────────────
-// HELPERS
-// ────────────────────────────────────────
-function getInitials(name) {
-  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
-}
-
-function escapeHTML(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
-function showError() {
-  document.getElementById('loadingState').style.display = 'none';
-  document.getElementById('errorState').style.display   = 'block';
-}
-
-// ── BUTTONS ──
-function scheduleVisit() {
-  alert('Visit scheduling coming soon!');
-}
-
-function contactOwner() {
-  alert('Owner contact details coming soon!');
-}
-
-function openChat() {
-  const id    = getHostelId();
-  const title = document.getElementById('detailTitle').textContent;
-  window.location.href =
-    `chat.html?hostel_id=${id}&hostel_name=${encodeURIComponent(title)}`;
-}
-// ────────────────────────────────────────
 // TOGGLE REPLY FORM
 // ────────────────────────────────────────
 function toggleReplyForm(reviewId) {
@@ -534,15 +378,16 @@ function toggleReplyForm(reviewId) {
 
   if (!form) return;
 
-  const isVisible = form.style.display !== 'none' && form.style.display !== '';
+  const isVisible = form.style.display === 'block';
 
   if (isVisible) {
-    form.style.display   = 'none';
-    toggle.textContent   = '✏️ Reply';
+    form.style.display = 'none';
+    if (toggle) toggle.textContent = '✏️ Reply';
   } else {
-    form.style.display   = 'block';
-    toggle.textContent   = '✕ Cancel';
-    document.getElementById(`reply-input-${reviewId}`).focus();
+    form.style.display = 'block';
+    if (toggle) toggle.textContent = '✕ Cancel';
+    const input = document.getElementById(`reply-input-${reviewId}`);
+    if (input) input.focus();
   }
 }
 
@@ -562,14 +407,13 @@ function cancelReply(reviewId) {
 // SUBMIT OWNER REPLY
 // ────────────────────────────────────────
 async function submitReply(reviewId) {
-  const input   = document.getElementById(`reply-input-${reviewId}`);
-  const btn     = document.getElementById(`reply-btn-${reviewId}`);
-  const errorEl = document.getElementById(`reply-error-${reviewId}`);
+  const input     = document.getElementById(`reply-input-${reviewId}`);
+  const btn       = document.getElementById(`reply-btn-${reviewId}`);
+  const errorEl   = document.getElementById(`reply-error-${reviewId}`);
   const replyText = input.value.trim();
 
   errorEl.style.display = 'none';
 
-  // Validate
   if (replyText.length < 5) {
     errorEl.textContent   = 'Reply must be at least 5 characters.';
     errorEl.style.display = 'block';
@@ -594,21 +438,18 @@ async function submitReply(reviewId) {
 
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-    // ── INSTANT UI UPDATE (DoD requirement) ──
-    // Update local state array with reply
     const reviewIndex = reviewsLocalList.findIndex(r => r.id === reviewId);
     if (reviewIndex !== -1) {
       reviewsLocalList[reviewIndex].owner_reply = replyText;
     }
 
-    // Replace the reply form with the rendered reply tag
-    const form = document.getElementById(`reply-form-${reviewId}`);
+    const form   = document.getElementById(`reply-form-${reviewId}`);
     const toggle = document.getElementById(`reply-toggle-${reviewId}`);
 
-    const replyDiv = document.createElement('div');
-    replyDiv.className = 'owner-reply';
+    const replyDiv       = document.createElement('div');
+    replyDiv.className   = 'owner-reply';
     replyDiv.style.animation = 'fadeUp 0.3s ease';
-    replyDiv.innerHTML = `
+    replyDiv.innerHTML   = `
       <div class="owner-reply-tag">🏠 Owner Response</div>
       <div class="owner-reply-text">${escapeHTML(replyText)}</div>
     `;
@@ -623,5 +464,130 @@ async function submitReply(reviewId) {
     btn.textContent = 'Post Response';
   }
 }
+
+// ────────────────────────────────────────
+// BOOKING MODAL
+// ────────────────────────────────────────
+function scheduleVisit() {
+  const token = localStorage.getItem('access_token');
+  const role  = localStorage.getItem('role');
+
+  if (!token) {
+    alert('Please login to book a hostel.');
+    window.location.href = 'login.html';
+    return;
+  }
+
+  if (role === 'Owner') {
+    alert('Owners cannot book hostels.');
+    return;
+  }
+
+  const title = document.getElementById('detailTitle').textContent;
+  const price = document.getElementById('contactPrice').textContent;
+
+  document.getElementById('modalHostelName').textContent  = title;
+  document.getElementById('modalHostelPrice').textContent = price;
+
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('bookingDate').min   = today;
+  document.getElementById('bookingDate').value = '';
+
+  document.getElementById('modalError').style.display   = 'none';
+  document.getElementById('modalSuccess').style.display = 'none';
+  document.getElementById('bookingModal').style.display = 'flex';
+}
+
+function closeModal() {
+  document.getElementById('bookingModal').style.display = 'none';
+}
+
+async function submitBooking() {
+  const date    = document.getElementById('bookingDate').value;
+  const errorEl = document.getElementById('modalError');
+  const successEl = document.getElementById('modalSuccess');
+  const btn     = document.getElementById('confirmBtn');
+
+  errorEl.style.display   = 'none';
+  successEl.style.display = 'none';
+
+  if (!date) {
+    errorEl.textContent   = 'Please select a move-in date.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  const token = localStorage.getItem('access_token');
+
+  btn.disabled    = true;
+  btn.textContent = 'Submitting...';
+
+  try {
+    const response = await fetch(`${API_BASE}/bookings/create/`, {
+      method:  'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        hostel:       currentHostelId,
+        booking_date: date
+      })
+    });
+
+    if (response.ok) {
+      successEl.textContent   = '✅ Booking request submitted!';
+      successEl.style.display = 'block';
+      setTimeout(() => {
+        closeModal();
+        window.location.href = 'my-bookings.html';
+      }, 2000);
+    } else {
+      const data = await response.json();
+      errorEl.textContent   = data.error || 'Booking failed.';
+      errorEl.style.display = 'block';
+      btn.disabled    = false;
+      btn.textContent = 'Confirm Request';
+    }
+
+  } catch (error) {
+    errorEl.textContent   = 'Failed to submit booking.';
+    errorEl.style.display = 'block';
+    btn.disabled    = false;
+    btn.textContent = 'Confirm Request';
+  }
+}
+
+// ────────────────────────────────────────
+// HELPERS
+// ────────────────────────────────────────
+function getInitials(name) {
+  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+}
+
+function escapeHTML(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function showError() {
+  document.getElementById('loadingState').style.display = 'none';
+  document.getElementById('errorState').style.display   = 'block';
+}
+
+function contactOwner() {
+  alert('Owner contact details coming soon!');
+}
+
+function openChat() {
+  const id    = getHostelId();
+  const title = document.getElementById('detailTitle').textContent;
+  window.location.href =
+    `chat.html?hostel_id=${id}&hostel_name=${encodeURIComponent(title)}`;
+}
+
 // ── INIT ──
 fetchHostelDetail();
