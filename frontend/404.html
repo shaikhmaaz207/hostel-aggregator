@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>404 — Page Not Found | HostelFinder</title>
+  <meta name="robots" content="noindex, nofollow"/>
+  <link rel="stylesheet" href="css/style.css"/>
+  <style>
+    .error-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px 20px;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+      color: #fff;
+    }
+
+    .error-code {
+      font-size: 8rem;
+      font-weight: 900;
+      color: #e94560;
+      line-height: 1;
+      margin-bottom: 16px;
+      text-shadow: 0 4px 20px rgba(233, 69, 96, 0.4);
+    }
+
+    .error-emoji {
+      font-size: 4rem;
+      margin-bottom: 24px;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-15px); }
+    }
+
+    .error-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #fff;
+    }
+
+    .error-subtitle {
+      font-size: 1.1rem;
+      color: #aaa;
+      margin-bottom: 40px;
+      max-width: 500px;
+      line-height: 1.6;
+    }
+
+    .error-actions {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn-home {
+      padding: 14px 32px;
+      background: #e94560;
+      color: #fff;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1rem;
+      transition: opacity 0.2s;
+    }
+
+    .btn-home:hover { opacity: 0.88; }
+
+    .btn-back {
+      padding: 14px 32px;
+      background: transparent;
+      color: #fff;
+      border: 2px solid #555;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: border-color 0.2s;
+      cursor: pointer;
+    }
+
+    .btn-back:hover { border-color: #fff; }
+
+    .error-links {
+      margin-top: 48px;
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .error-links a {
+      color: #888;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+
+    .error-links a:hover { color: #fff; }
+
+    .brand {
+      position: absolute;
+      top: 24px;
+      left: 40px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #fff;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <a href="index.html" class="brand">🏠 HostelFinder</a>
+
+  <div class="error-page">
+    <div class="error-emoji">🏚️</div>
+    <div class="error-code">404</div>
+    <h1 class="error-title">Oops! Page Not Found</h1>
+    <p class="error-subtitle">
+      The page you are looking for doesn't exist or has been moved.
+      Don't worry — let's get you back to finding your perfect hostel!
+    </p>
+
+    <div class="error-actions">
+      <a href="index.html" class="btn-home">
+        🏠 Back to Home
+      </a>
+      <button class="btn-back" onclick="history.back()">
+        ← Go Back
+      </button>
+    </div>
+
+    <div class="error-links">
+      <a href="index.html">Browse Hostels</a>
+      <a href="map.html">Map View</a>
+      <a href="login.html">Login</a>
+      <a href="register.html">Register</a>
+    </div>
+  </div>
+
+</body>
+</html>
